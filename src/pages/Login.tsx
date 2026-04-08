@@ -131,12 +131,17 @@ const Login = () => {
             </button>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline font-medium">
-              Sign Up
+          <div className="text-center mt-6 space-y-2">
+            <Link to="/forgot-password" className="text-xs text-primary hover:underline block">
+              Forgot password?
             </Link>
-          </p>
+            <p className="text-xs text-muted-foreground">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-primary hover:underline font-medium">
+                Sign Up
+              </Link>
+            </p>
+          </div>
         </div>
       </motion.div>
     </div>
