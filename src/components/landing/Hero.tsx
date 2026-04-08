@@ -1,8 +1,6 @@
-import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
-
-const HeroScene = lazy(() => import("./HeroScene"));
+import rocketImg from "@/assets/rocket.png";
 
 const Hero = () => {
   return (
@@ -41,10 +39,10 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <button className="btn-pill gradient-cyan-pink text-primary-foreground text-sm flex items-center gap-2 group">
+              <a href="/signup" className="btn-pill gradient-cyan-pink text-primary-foreground text-sm flex items-center gap-2 group no-underline">
                 Start Monitoring
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+              </a>
               <button className="btn-pill glass text-foreground text-sm flex items-center gap-2 hover:bg-muted/40">
                 <Play className="w-4 h-4" />
                 Watch Demo
@@ -65,20 +63,38 @@ const Hero = () => {
             </div>
           </motion.div>
 
-          {/* Right — 3D Scene */}
+          {/* Right — Floating Rocket Image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.3 }}
-            className="h-[350px] sm:h-[450px] lg:h-[550px]"
+            className="flex items-center justify-center h-[350px] sm:h-[450px] lg:h-[550px] relative"
           >
-            <Suspense fallback={
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-              </div>
-            }>
-              <HeroScene />
-            </Suspense>
+            {/* Glow behind rocket */}
+            <div className="absolute w-64 h-64 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+            <div className="absolute w-48 h-48 rounded-full bg-secondary/10 blur-3xl animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
+            
+            {/* Floating rocket */}
+            <motion.img
+              src={rocketImg}
+              alt="AegisSpace AI Rocket"
+              width={800}
+              height={1024}
+              className="relative z-10 w-[280px] sm:w-[350px] lg:w-[420px] drop-shadow-[0_0_40px_hsla(185,100%,71%,0.3)]"
+              animate={{
+                y: [0, -15, 0],
+                rotate: [0, 1, -1, 0],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            {/* Orbiting rings (CSS) */}
+            <div className="absolute w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] rounded-full border border-primary/10 animate-spin" style={{ animationDuration: "20s" }} />
+            <div className="absolute w-[350px] h-[350px] lg:w-[460px] lg:h-[460px] rounded-full border border-secondary/10 animate-spin" style={{ animationDuration: "30s", animationDirection: "reverse" }} />
           </motion.div>
         </div>
       </div>

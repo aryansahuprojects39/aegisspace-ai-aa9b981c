@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const navLinks = [
   { label: "Home", href: "#home" },
@@ -50,12 +51,14 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-3">
-          <Button variant="ghost" className="text-muted-foreground hover:text-primary rounded-full">
-            Login
-          </Button>
-          <button className="btn-pill gradient-cyan-pink text-primary-foreground text-sm">
+          <Link to="/login">
+            <Button variant="ghost" className="text-muted-foreground hover:text-primary rounded-full">
+              Login
+            </Button>
+          </Link>
+          <Link to="/signup" className="btn-pill gradient-cyan-pink text-primary-foreground text-sm no-underline">
             Try Free
-          </button>
+          </Link>
         </div>
 
         <button
@@ -79,8 +82,12 @@ const Navbar = () => {
             </a>
           ))}
           <div className="pt-3 border-t border-border flex flex-col gap-2">
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground rounded-full">Login</Button>
-            <button className="btn-pill gradient-cyan-pink text-primary-foreground text-sm w-full">Try Free</button>
+            <Link to="/login" onClick={() => setMobileOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start text-muted-foreground rounded-full">Login</Button>
+            </Link>
+            <Link to="/signup" onClick={() => setMobileOpen(false)} className="btn-pill gradient-cyan-pink text-primary-foreground text-sm w-full text-center no-underline block">
+              Try Free
+            </Link>
           </div>
         </div>
       )}
