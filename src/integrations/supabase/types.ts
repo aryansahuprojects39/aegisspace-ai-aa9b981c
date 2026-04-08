@@ -44,6 +44,48 @@ export type Database = {
         }
         Relationships: []
       }
+      telemetry_data: {
+        Row: {
+          anomaly_reason: string | null
+          created_at: string
+          current: number | null
+          device_id: string
+          gyro_x: number | null
+          gyro_y: number | null
+          gyro_z: number | null
+          id: string
+          is_anomaly: boolean
+          temperature: number | null
+          voltage: number | null
+        }
+        Insert: {
+          anomaly_reason?: string | null
+          created_at?: string
+          current?: number | null
+          device_id?: string
+          gyro_x?: number | null
+          gyro_y?: number | null
+          gyro_z?: number | null
+          id?: string
+          is_anomaly?: boolean
+          temperature?: number | null
+          voltage?: number | null
+        }
+        Update: {
+          anomaly_reason?: string | null
+          created_at?: string
+          current?: number | null
+          device_id?: string
+          gyro_x?: number | null
+          gyro_y?: number | null
+          gyro_z?: number | null
+          id?: string
+          is_anomaly?: boolean
+          temperature?: number | null
+          voltage?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
