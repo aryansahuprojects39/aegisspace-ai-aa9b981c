@@ -3,50 +3,71 @@
 # Landing Page Enhancements Plan
 
 ## Summary
-Three changes: (1) Replace the "Capabilities" bento-grid Features section with 3D flip cards, (2) Add a Contact Us section with a form before the Footer, (3) Add smooth scroll behavior and scroll-triggered animations throughout.
+Rename "ESP32" to "FLARE Module" everywhere, add a Reviews section, optimize pipeline images, update Pricing with monthly/yearly toggle, first-login discount, and 7-day free trial badge.
 
-## 1. Features Section — Flip Cards (Replace "Capabilities")
+## 1. Rename ESP32 → FLARE Module
 
-**Current state**: Bento grid with image-overlay cards, labeled "Capabilities"
-**Target**: Rename to "Features", use 3D flip card effect (front shows icon + title, back shows image + description)
+Replace all references to "ESP32" with "FLARE Module" (or "FLARE" where space is tight) across these files:
+- `Hero.tsx` — description text
+- `AboutUs.tsx` — description paragraphs
+- `Features.tsx` — shortDesc, longDesc, and section subtitle
+- `HowItWorks.tsx` — step label, import alias rename
+- `FAQ.tsx` — answers mentioning ESP32
+- `DashboardPreview.tsx` — status labels
+- `Dashboard.tsx` — status labels and waiting messages
+- `Pricing.tsx` — feature list items ("1 ESP32 Device" → "1 FLARE Module", etc.)
 
-- Rewrite `src/components/landing/Features.tsx`:
-  - Section label: "FEATURES" instead of "CAPABILITIES"
-  - 6 cards in a responsive grid (1 col mobile, 2 col tablet, 3 col desktop)
-  - Each card uses CSS `perspective` + `transform-style: preserve-3d` + `rotateY(180deg)` on hover
-  - Front face: glassmorphism card with icon, title, short description
-  - Back face: full image with gradient overlay and extended description
-  - Framer Motion `whileInView` stagger animations for entrance
+## 2. Reviews Section (New)
 
-## 2. Contact Us Section
+Create `src/components/landing/Reviews.tsx`:
+- Section heading: "What Our Clients Say" with gradient text
+- 3-4 review cards from fictional small startups/companies:
+  - Company name, reviewer name + role, star rating, quote
+  - Example: "OrbitMinds — CTO — 'AegisSpace AI cut our anomaly response time by 80%'"
+  - "NovaSat Labs — Lead Engineer — 'The FLARE module integration was seamless'"
+  - "Stellar Dynamics — Founder — 'Best monitoring platform for small sat missions'"
+  - "RocketBay — Mission Director — 'Real-time telemetry changed how we operate'"
+- Glassmorphism cards with star icons, avatar placeholder initials
+- Framer Motion stagger animations
+- Place between Insights and FAQ in `Index.tsx`
+- Add "Reviews" nav link in `Navbar.tsx`
 
-- Create `src/components/landing/ContactUs.tsx`:
-  - Placed between FAQ and Footer in the page flow
-  - Section heading: "Get In Touch" with gradient text
-  - Two-column layout: left side has contact info (email, location, social links), right side has a form
-  - Form fields: Name, Email, Subject, Message (textarea)
-  - Glassmorphism card styling, gradient submit button
-  - Client-side validation with toast feedback (no backend needed for now — just show success toast)
-  - Framer Motion entrance animations
+## 3. Pipeline Images — Faster Loading
 
-- Update `src/pages/Index.tsx`: Add `<ContactUs />` between `<Pricing />` and `<Footer />`
-- Update `src/components/landing/Navbar.tsx`: Add "Contact" nav link
+In `HowItWorks.tsx`:
+- Add `loading="eager"` and explicit `width`/`height` to pipeline step images
+- Add `fetchpriority="high"` for the first 2-3 images
+- Use smaller dimensions in the `img` tag (already has `w-full h-36`)
 
-## 3. Smooth Scroll & Scroll-Triggered Animations
+## 4. Pricing — Monthly/Yearly Toggle + Discount + Free Trial
 
-- Add `scroll-behavior: smooth` to `html` in `src/index.css`
-- Enhance all landing sections with consistent framer-motion `whileInView` animations:
-  - Fade-up for headings and text blocks
-  - Staggered entrance for card grids
-  - Scale-in for icons and stat numbers
-- Most sections already use `whileInView` — ensure consistency and add where missing (Partners, Footer)
+Rewrite `src/components/landing/Pricing.tsx`:
+- Add a Monthly/Yearly toggle at the top using a pill-style toggle group
+- Monthly prices: Starter $29, Pro $79, Enterprise Custom
+- Yearly prices: Starter $24 (~17% off), Pro $66 (~17% off), Enterprise Custom
+- Show "Save 17%" badge next to the yearly toggle
+- Add a banner/badge: "🎉 20% off your first month — auto-applied at checkout"
+- Add "7-Day Free Trial" badge on Starter and Pro cards
+- Show original price crossed out with discounted first-month price
+- Keep existing glassmorphism card styling and animations
+
+## 5. Integration
+
+Update `Index.tsx`: Add `<Reviews />` between `<Insights />` and `<FAQ />`
+Update `Navbar.tsx`: Add "Reviews" nav link
 
 ## Files to Create
-- `src/components/landing/ContactUs.tsx`
+- `src/components/landing/Reviews.tsx`
 
 ## Files to Modify
-- `src/components/landing/Features.tsx` — full rewrite to flip cards
-- `src/pages/Index.tsx` — add ContactUs import and component
-- `src/components/landing/Navbar.tsx` — add Contact nav link
-- `src/index.css` — add `scroll-behavior: smooth` to html, add flip-card CSS utilities
+- `src/components/landing/Hero.tsx`
+- `src/components/landing/AboutUs.tsx`
+- `src/components/landing/Features.tsx`
+- `src/components/landing/HowItWorks.tsx`
+- `src/components/landing/FAQ.tsx`
+- `src/components/landing/DashboardPreview.tsx`
+- `src/pages/Dashboard.tsx`
+- `src/components/landing/Pricing.tsx`
+- `src/pages/Index.tsx`
+- `src/components/landing/Navbar.tsx`
 
