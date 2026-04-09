@@ -36,7 +36,7 @@ const HowItWorks = () => {
           </p>
         </motion.div>
 
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-0">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-2 lg:gap-0">
           {steps.map((step, i) => (
             <motion.div
               key={step.label}
