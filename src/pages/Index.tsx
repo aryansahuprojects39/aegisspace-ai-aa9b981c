@@ -8,6 +8,7 @@ import Insights from "@/components/landing/Insights";
 import FAQ from "@/components/landing/FAQ";
 import Pricing from "@/components/landing/Pricing";
 import Footer from "@/components/landing/Footer";
+import ContactUs from "@/components/landing/ContactUs";
 import ParallaxStars from "@/components/landing/ParallaxStars";
 
 const Index = () => {
@@ -23,6 +24,7 @@ const Index = () => {
       <Insights />
       <FAQ />
       <Pricing />
+      <ContactUs />
       <Footer />
     </div>
   );
