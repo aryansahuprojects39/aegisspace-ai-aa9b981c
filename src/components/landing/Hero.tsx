@@ -1,22 +1,25 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
-import rocketImg from "@/assets/rocket.png";
+import pslvHero from "@/assets/pslv-hero.jpg";
 
 const Hero = () => {
   return (
-    <section id="home" className="relative min-h-screen flex items-center overflow-hidden pt-20">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-space-mid/20 to-background" />
-      
-      {/* Subtle grid */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: "linear-gradient(hsla(185,100%,71%,0.3) 1px, transparent 1px), linear-gradient(90deg, hsla(185,100%,71%,0.3) 1px, transparent 1px)",
-        backgroundSize: "60px 60px"
-      }} />
+    <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <img
+          src={pslvHero}
+          alt="PSLV Launch Vehicle"
+          width={1920}
+          height={1080}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
+      </div>
 
-      <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Left — Text */}
+      <div className="container mx-auto px-4 lg:px-8 relative z-10 pt-24">
+        <div className="max-w-2xl space-y-6 lg:space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -61,40 +64,6 @@ const Hero = () => {
                 </div>
               ))}
             </div>
-          </motion.div>
-
-          {/* Right — Floating Rocket Image */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="flex items-center justify-center h-[350px] sm:h-[450px] lg:h-[550px] relative"
-          >
-            {/* Glow behind rocket */}
-            <div className="absolute w-64 h-64 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
-            <div className="absolute w-48 h-48 rounded-full bg-secondary/10 blur-3xl animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
-            
-            {/* Floating rocket */}
-            <motion.img
-              src={rocketImg}
-              alt="AegisSpace AI Rocket"
-              width={800}
-              height={1024}
-              className="relative z-10 w-[280px] sm:w-[350px] lg:w-[420px] drop-shadow-[0_0_40px_hsla(185,100%,71%,0.3)]"
-              animate={{
-                y: [0, -15, 0],
-                rotate: [0, 1, -1, 0],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-
-            {/* Orbiting rings (CSS) */}
-            <div className="absolute w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] rounded-full border border-primary/10 animate-spin" style={{ animationDuration: "20s" }} />
-            <div className="absolute w-[350px] h-[350px] lg:w-[460px] lg:h-[460px] rounded-full border border-secondary/10 animate-spin" style={{ animationDuration: "30s", animationDirection: "reverse" }} />
           </motion.div>
         </div>
       </div>

@@ -1,93 +1,43 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Activity, ShieldAlert, Brain, Monitor } from "lucide-react";
 import featureTelemetry from "@/assets/feature-telemetry.jpg";
 import featureAnomaly from "@/assets/feature-anomaly.jpg";
 import featureAi from "@/assets/feature-ai.jpg";
 import featureDashboard from "@/assets/feature-dashboard.jpg";
+import insightLaunch from "@/assets/insight-launch.jpg";
+import insightIot from "@/assets/insight-iot.jpg";
 
 const features = [
-  {
-    icon: Activity,
-    title: "Real-Time Telemetry",
-    description: "Live streaming of temperature, voltage, current, and gyroscope data directly from ESP32 hardware.",
-    gradient: "from-primary/20 to-primary/5",
-    image: featureTelemetry,
-  },
-  {
-    icon: ShieldAlert,
-    title: "Anomaly Detection",
-    description: "Intelligent threshold monitoring with multi-sensor correlation to detect anomalies before failures occur.",
-    gradient: "from-secondary/20 to-secondary/5",
-    image: featureAnomaly,
-  },
-  {
-    icon: Brain,
-    title: "AI Predictions",
-    description: "Machine learning models analyze patterns across telemetry streams to predict potential system failures.",
-    gradient: "from-accent/30 to-accent/10",
-    image: featureAi,
-  },
-  {
-    icon: Monitor,
-    title: "Mission Control Dashboard",
-    description: "Real-time 3D digital twin, status orbs, and comprehensive monitoring panels in one unified view.",
-    gradient: "from-primary/20 to-secondary/10",
-    image: featureDashboard,
-  },
+  { title: "Real-Time Telemetry", description: "Live ESP32 sensor streaming", image: featureTelemetry },
+  { title: "Anomaly Detection", description: "AI-powered threat identification", image: featureAnomaly },
+  { title: "AI Predictions", description: "Predictive failure analysis", image: featureAi },
+  { title: "Mission Control", description: "3D digital twin dashboard", image: featureDashboard },
+  { title: "Launch Analytics", description: "Comprehensive mission data", image: insightLaunch },
+  { title: "IoT Integration", description: "Hardware sensor connectivity", image: insightIot },
 ];
 
-const FlipCard = ({ feature, index }: { feature: typeof features[0]; index: number }) => {
-  const [flipped, setFlipped] = useState(false);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="perspective-1000 h-[280px] cursor-pointer"
-      onClick={() => setFlipped(!flipped)}
-    >
-      <motion.div
-        className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
-      >
-        {/* Front */}
-        <div className="absolute inset-0 glass rounded-2xl p-6 flex flex-col" style={{ backfaceVisibility: "hidden" }}>
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4`}>
-            <feature.icon className="w-6 h-6 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold font-heading text-foreground mb-2">{feature.title}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed flex-1">{feature.description}</p>
-          <span className="text-[10px] text-primary mt-2">Click to flip →</span>
-        </div>
-
-        {/* Back */}
-        <div
-          className="absolute inset-0 glass rounded-2xl overflow-hidden"
-          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-        >
-          <img
-            src={feature.image}
-            alt={feature.title}
-            loading="lazy"
-            width={512}
-            height={512}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <h3 className="text-sm font-semibold font-heading text-foreground">{feature.title}</h3>
-            <span className="text-[10px] text-primary">Click to flip back</span>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-};
+const FeatureCard = ({ feature, index, className = "" }: { feature: typeof features[0]; index: number; className?: string }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5, delay: index * 0.1 }}
+    className={`relative rounded-2xl overflow-hidden group cursor-pointer ${className}`}
+  >
+    <img
+      src={feature.image}
+      alt={feature.title}
+      loading="lazy"
+      width={640}
+      height={512}
+      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+    <div className="absolute bottom-0 left-0 right-0 p-5">
+      <h3 className="text-base lg:text-lg font-semibold font-heading text-foreground">{feature.title}</h3>
+      <p className="text-xs text-muted-foreground mt-1">{feature.description}</p>
+    </div>
+  </motion.div>
+);
 
 const Features = () => {
   return (
@@ -109,10 +59,17 @@ const Features = () => {
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((f, i) => (
-            <FlipCard key={f.title} feature={f} index={i} />
-          ))}
+        <div className="grid lg:grid-cols-3 gap-4">
+          {/* Tall left card */}
+          <FeatureCard feature={features[0]} index={0} className="lg:row-span-2 min-h-[250px] lg:min-h-0" />
+          {/* 2x2 grid */}
+          <FeatureCard feature={features[1]} index={1} className="min-h-[200px]" />
+          <FeatureCard feature={features[2]} index={2} className="min-h-[200px]" />
+          <FeatureCard feature={features[3]} index={3} className="min-h-[200px]" />
+          <FeatureCard feature={features[4]} index={4} className="min-h-[200px]" />
+        </div>
+        <div className="mt-4">
+          <FeatureCard feature={features[5]} index={5} className="min-h-[200px] lg:min-h-[220px]" />
         </div>
       </div>
     </section>
