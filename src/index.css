@@ -148,4 +148,20 @@
   .perspective-1000 {
     perspective: 1000px;
   }
+
+  .glass-login {
+    background: hsla(240, 30%, 12%, 0.45);
+    backdrop-filter: blur(40px);
+    border: 1px solid hsla(185, 100%, 71%, 0.12);
+    box-shadow:
+      0 0 60px hsla(185, 100%, 71%, 0.08),
+      0 0 120px hsla(320, 100%, 71%, 0.05),
+      inset 0 1px 0 hsla(185, 100%, 71%, 0.1),
+      inset 0 -1px 0 hsla(320, 100%, 71%, 0.05);
+  }
+
+  @keyframes border-rotate {
+    0% { --border-angle: 0deg; }
+    100% { --border-angle: 360deg; }
+  }
 }
