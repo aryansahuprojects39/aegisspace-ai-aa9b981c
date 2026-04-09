@@ -1,18 +1,23 @@
 import { motion } from "framer-motion";
 import { Cpu, Webhook, Database, Brain, Monitor } from "lucide-react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import stepEsp32 from "@/assets/step-esp32.jpg";
+import stepWebhook from "@/assets/step-webhook.jpg";
+import stepDatabase from "@/assets/step-database.jpg";
+import stepAi from "@/assets/step-ai.jpg";
+import stepMonitor from "@/assets/step-monitor.jpg";
 
 const steps = [
-  { icon: Cpu, label: "ESP32", desc: "Sensors collect telemetry" },
-  { icon: Webhook, label: "n8n", desc: "Webhook processes data" },
-  { icon: Database, label: "Cloud DB", desc: "Store & validate" },
-  { icon: Brain, label: "AI Engine", desc: "Detect anomalies" },
-  { icon: Monitor, label: "Dashboard", desc: "Real-time insights" },
+  { icon: Cpu, label: "ESP32", desc: "Sensors collect telemetry", image: stepEsp32 },
+  { icon: Webhook, label: "n8n", desc: "Webhook processes data", image: stepWebhook },
+  { icon: Database, label: "Cloud DB", desc: "Store & validate", image: stepDatabase },
+  { icon: Brain, label: "AI Engine", desc: "Detect anomalies", image: stepAi },
+  { icon: Monitor, label: "Dashboard", desc: "Real-time insights", image: stepMonitor },
 ];
 
 const HowItWorks = () => {
   return (
     <section id="how-it-works" className="relative py-24 lg:py-32">
-      {/* Background accent */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-space-purple/5 to-transparent" />
 
       <div className="container mx-auto px-4 lg:px-8 relative">
@@ -41,13 +46,31 @@ const HowItWorks = () => {
               transition={{ delay: i * 0.15 }}
               className="flex items-center"
             >
-              <div className="glass rounded-2xl p-6 text-center min-w-[140px] card-tilt">
-                <div className="w-14 h-14 rounded-xl gradient-cyan-pink mx-auto flex items-center justify-center mb-3">
-                  <step.icon className="w-7 h-7 text-primary-foreground" />
-                </div>
-                <div className="font-heading font-semibold text-foreground">{step.label}</div>
-                <div className="text-xs text-muted-foreground mt-1">{step.desc}</div>
-              </div>
+              <HoverCard openDelay={100} closeDelay={100}>
+                <HoverCardTrigger asChild>
+                  <div className="glass rounded-2xl p-6 text-center min-w-[140px] card-tilt cursor-pointer">
+                    <div className="w-14 h-14 rounded-xl gradient-cyan-pink mx-auto flex items-center justify-center mb-3">
+                      <step.icon className="w-7 h-7 text-primary-foreground" />
+                    </div>
+                    <div className="font-heading font-semibold text-foreground">{step.label}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{step.desc}</div>
+                  </div>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-64 p-0 overflow-hidden glass border-border" side="top" sideOffset={8}>
+                  <img
+                    src={step.image}
+                    alt={step.label}
+                    loading="lazy"
+                    width={256}
+                    height={160}
+                    className="w-full h-36 object-cover"
+                  />
+                  <div className="p-3">
+                    <div className="text-sm font-semibold text-foreground">{step.label}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{step.desc}</div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
 
               {i < steps.length - 1 && (
                 <div className="hidden lg:flex items-center px-2">
