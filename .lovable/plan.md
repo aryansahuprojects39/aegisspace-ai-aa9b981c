@@ -1,56 +1,71 @@
 
-# AegisSpace AI — Landing Page Build
 
-## Design System
-- **Dark space palette**: `#0B0F2F` → `#1A1A40` → `#2D1E6B` backgrounds
-- **Accents**: Cyan `#6EF3FF`, Pink `#FF6EC7`
-- **Glassmorphism cards** with soft blur, rounded edges, subtle borders
-- **Pill-shaped buttons** with gradient fills and hover lift effects
-- **Clean sans-serif typography** (Inter or similar)
+# Landing Page Redesign Plan
 
-## 3D Scenes (React Three Fiber)
-- **Hero scene**: Floating abstract rocket/satellite with rings, spheres, and cubes orbiting slowly. Mouse-driven perspective tilt (rotateX/rotateY).
-- **Background**: Starfield particle system across the page with slow parallax on scroll
-- **Floating geometric accents**: Soft-glow spheres and rings between sections
+Inspired by the AgroVision reference images, adapted to AegisSpace AI's dark space theme with cyan/pink accents.
 
-## Parallax System
-- 3-layer depth: background stars (slow), mid-layer glow shapes (medium), foreground 3D objects (fast)
-- Scroll-driven section speed differences
-- Card hover: 3D tilt effect with shadow shift
+## Changes Overview
 
-## Landing Page Sections
+### 1. Hero Section - Full-Width Background Image
+- Replace the current split-layout hero with a full-width hero featuring a PSLV launch vehicle background image (sourced from ISRO/public domain via Unsplash or generated)
+- Add a dark overlay gradient so text remains readable
+- Keep the "AegisSpace AI" branding, tagline, and CTA buttons
+- Add a small badge pill ("Real-Time Satellite Monitoring") like the reference's "Sustainable Farming" badge
+- Stats row stays at the bottom of the hero
 
-### 1. Navbar
-- Logo "AegisSpace AI" | Home | Features | Dashboard | Pricing | Contact | Login | Try Free
-- Sticky, glass-blur background on scroll
+### 2. Trusted Partners / Logos Bar (New)
+- Add a scrolling partners bar below the hero (like the reference's "TRUSTED BY LEADING AGRI-TECH PARTNERS")
+- Use space/tech partner names with icons: "SpaceLink", "OrbitTech", "SensorCore", "LaunchBase", "TeleSat", "AstroNet"
+- Glassmorphism strip with muted text
 
-### 2. Hero
-- **Left**: "AegisSpace AI" title, tagline about real-time satellite monitoring, two CTA buttons (gradient pill style)
-- **Right**: Interactive 3D scene — abstract minimal rocket with orbiting geometric shapes, mouse-reactive parallax
+### 3. About Us Section (New)
+- Split layout: left side has two overlapping images (space/rocket themed), right side has "ABOUT US" label, heading "Innovating the Future of Launch Monitoring", and description paragraph
+- Matches the reference's asymmetric image + text layout
 
-### 3. Features (4 glass cards)
-- Real-Time Telemetry, Anomaly Detection, AI Predictions, Mission Control Dashboard
-- Each card with icon, title, description, hover tilt effect
+### 4. Features Section - Card Grid with Images (Redesign)
+- Replace flip cards with image-overlay cards matching the reference's "Insights" bento grid style
+- Each card has a full background image, gradient overlay at bottom, and title text
+- Use a bento-style layout: one tall card on the left, 2x2 grid on the right
+- 6 cards total with space-themed images
+- Keep the same 4 features + add 2 more insight-style cards
 
-### 4. How It Works
-- Visual pipeline: ESP32 → n8n → Supabase → AI → Dashboard
-- Animated flow lines connecting each step
+### 5. How It Works - Keep Existing
+- Keep the current pipeline hover-card design (already looks good)
 
-### 5. Dashboard Preview
-- Static screenshot/mockup of the dashboard layout (no fake data)
-- "Waiting for ESP32 data…" placeholder shown in preview graphs
-- Glass-bordered frame
+### 6. Insights Section (New)
+- Bento grid of 6 cards with space/launch-themed titles
+- Large featured card on the left, smaller cards in a 2-column grid on the right
+- Each card has a background image with gradient overlay and title text at bottom
+- Titles like "Real-Time Telemetry in Modern Space Missions", "AI-Powered Anomaly Detection", etc.
 
-### 6. Pricing (3 plans)
-- Starter ($29/mo), Pro ($79/mo), Enterprise (Custom)
-- Dark glass cards, Pro highlighted/elevated
-- Feature checklist per plan, CTA buttons
+### 7. FAQ Section (New)
+- Accordion-based FAQ section matching the reference screenshot
+- Dark background, glassmorphism accordion items
+- "FAQ" label, "Got Questions? We've Got You Covered." heading
+- 5 relevant questions about AegisSpace AI
 
-### 7. Footer
-- Links, social icons, copyright
+### 8. Pricing & Footer - Keep Existing
+- No changes needed
 
-## Technical Setup
-- Install `@react-three/fiber@^8.18`, `@react-three/drei@^9.122.0`, `three@^0.160`
-- Custom Tailwind theme with space color palette
-- Framer Motion for scroll animations and parallax
-- Update CSS variables to match the dark space design system
+## New Files
+- `src/components/landing/Partners.tsx` - Logo bar
+- `src/components/landing/AboutUs.tsx` - About section
+- `src/components/landing/Insights.tsx` - Insights bento grid
+- `src/components/landing/FAQ.tsx` - Accordion FAQ
+- `src/assets/pslv-hero.jpg` - Generated PSLV background image for hero
+
+## Modified Files
+- `src/pages/Index.tsx` - Add new sections in order
+- `src/components/landing/Hero.tsx` - Full-width background image layout
+- `src/components/landing/Features.tsx` - Image-overlay bento cards instead of flip cards
+- `src/components/landing/Navbar.tsx` - Add "About Us", "Insights", "FAQ" nav links
+
+## Section Order
+Home (Hero) → Partners → About Us → Features → How It Works → Insights → FAQ → Pricing → Footer
+
+## Technical Notes
+- PSLV background: Use a royalty-free rocket launch image from Unsplash or generate one via AI. ISRO images are typically public domain.
+- All new sections use existing glassmorphism utilities, framer-motion animations, and the space color theme
+- FAQ uses the existing shadcn Accordion component
+- Images for Insights/About will be AI-generated space-themed JPGs matching the dark cyan/pink palette
+
