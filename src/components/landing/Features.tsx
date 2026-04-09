@@ -10,8 +10,8 @@ import insightIot from "@/assets/insight-iot.jpg";
 const features = [
   {
     title: "Real-Time Telemetry",
-    shortDesc: "Live ESP32 sensor streaming",
-    longDesc: "Stream live data from ESP32 sensors with sub-second latency. Monitor temperature, voltage, current, and gyroscope readings in real time.",
+    shortDesc: "Live FLARE sensor streaming",
+    longDesc: "Stream live data from FLARE module sensors with sub-second latency. Monitor temperature, voltage, current, and gyroscope readings in real time.",
     icon: Satellite,
     image: featureTelemetry,
   },
@@ -46,7 +46,7 @@ const features = [
   {
     title: "IoT Integration",
     shortDesc: "Hardware sensor connectivity",
-    longDesc: "Seamlessly connect ESP32, Arduino, and custom sensor arrays via MQTT and REST APIs for plug-and-play telemetry ingestion.",
+    longDesc: "Seamlessly connect FLARE modules, Arduino, and custom sensor arrays via MQTT and REST APIs for plug-and-play telemetry ingestion.",
     icon: Cpu,
     image: insightIot,
   },
@@ -104,7 +104,7 @@ const Features = () => {
             Everything You Need for <span className="gradient-text">Launch Monitoring</span>
           </h2>
           <p className="text-muted-foreground mt-4 max-w-lg mx-auto">
-            From raw ESP32 telemetry to AI-powered insights, all in real time.
+            From raw FLARE module telemetry to AI-powered insights, all in real time.
           </p>
         </motion.div>
 

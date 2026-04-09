@@ -9,11 +9,11 @@ import {
 const faqs = [
   {
     question: "What is AegisSpace AI and how does it work?",
-    answer: "AegisSpace AI is a real-time satellite launch monitoring platform that uses ESP32 hardware sensors to collect telemetry data (temperature, voltage, current, gyroscope). This data flows through our AI pipeline for anomaly detection and predictive failure analysis, displayed on a live 3D dashboard.",
+    answer: "AegisSpace AI is a real-time satellite launch monitoring platform that uses FLARE module hardware sensors to collect telemetry data (temperature, voltage, current, gyroscope). This data flows through our AI pipeline for anomaly detection and predictive failure analysis, displayed on a live 3D dashboard.",
   },
   {
-    question: "Do I need my own ESP32 hardware to use the platform?",
-    answer: "While AegisSpace AI is designed to work with ESP32 sensor data, you can explore the dashboard and AI features with simulated data. For full real-time monitoring, you'll need an ESP32 board configured with our firmware to send telemetry data.",
+    question: "Do I need my own FLARE module to use the platform?",
+    answer: "While AegisSpace AI is designed to work with FLARE module sensor data, you can explore the dashboard and AI features with simulated data. For full real-time monitoring, you'll need a FLARE module configured with our firmware to send telemetry data.",
   },
   {
     question: "How does the AI anomaly detection work?",

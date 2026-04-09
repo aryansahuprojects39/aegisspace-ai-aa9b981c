@@ -38,7 +38,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-base lg:text-lg text-muted-foreground max-w-md leading-relaxed">
-              Mission-critical launch monitoring powered by real ESP32 telemetry, AI anomaly detection, and predictive failure analysis.
+              Mission-critical launch monitoring powered by real FLARE module telemetry, AI anomaly detection, and predictive failure analysis.
             </p>
 
             <div className="flex flex-wrap gap-4">
