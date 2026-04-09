@@ -40,13 +40,13 @@ const Login = () => {
         <img
           src={pslvHero}
           alt=""
-          className="w-full h-full object-cover scale-110 blur-sm"
+          className="w-full h-full object-cover scale-110 blur-[2px]"
         />
-        <div className="absolute inset-0 bg-background/75" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-background/80" />
+        <div className="absolute inset-0 bg-background/50" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/60" />
         {/* Radial glow accents */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/8 blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] rounded-full bg-secondary/6 blur-[100px]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/15 blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] rounded-full bg-secondary/10 blur-[100px]" />
       </div>
 
       <motion.div
