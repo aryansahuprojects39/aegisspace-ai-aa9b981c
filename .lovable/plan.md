@@ -1,31 +1,25 @@
 
 
-# Login Page Enhancement Plan
+# Login Background Fix + Signup Page Redesign
 
-## Verification Results
-All landing page sections render correctly:
-- Hero with PSLV background and "Real-Time Satellite Monitoring" pill
-- Reviews section with 4 glassmorphism cards, star ratings, FLARE branding
-- Pricing with Monthly/Yearly toggle, "Save 17%" badge, 20% discount banner, 7-Day Free Trial badges
-- FLARE module branding consistent throughout
-- Contact Us form and Footer intact
+## Issue Found
+The Login page's PSLV background is invisible because the overlay (`bg-background/75`) is too opaque, combined with `blur-sm` on the image. The background blends entirely into the dark theme.
 
-## Login Page Changes
+## Changes
 
-### File: `src/pages/Login.tsx`
+### 1. Fix Login Background Visibility (`src/pages/Login.tsx`)
+- Reduce the main overlay from `bg-background/75` to `bg-background/50`
+- Reduce the gradient overlay opacity
+- Increase the image `scale-110` slightly and reduce `blur-sm` to allow more detail through
+- Boost the radial glow accents from `bg-primary/8` to `bg-primary/15` for visible color pops
 
-1. **Add PSLV background image** — reuse the same `pslv-hero.jpg` from the landing page hero but with a different gradient overlay (more centered/blurred) so it feels distinct
-2. **Enhanced glossy glass card** — upgrade the login card with:
-   - Stronger glassmorphism: higher backdrop-blur (40px), more transparent background with a subtle gradient border
-   - Animated gradient border using a CSS pseudo-element or inline style
-   - Inner glow/shadow for depth
-   - Subtle animated gradient ring around the card edges
-3. **Background treatment** — darken and blur the PSLV image more than the landing page, add radial gradient overlays for a unique look compared to the hero
+### 2. Update Signup Page to Match Login Design (`src/pages/Signup.tsx`)
+- Replace `ParallaxStars` background with the same PSLV hero image background (with slightly different overlay tint to differentiate)
+- Replace `glass-strong` card with `glass-login` card + animated gradient border wrapper (same as Login)
+- Match input styling: `bg-muted/20 border-border/30` instead of `bg-muted/30 border-border/50`
+- Keep existing form fields (Display Name, Email, Password) and signup logic unchanged
 
-### File: `src/index.css`
-- Add a `.glass-login` utility class with enhanced blur, gradient border, and inner glow effects
-
-### Visual Differences from Landing Page
-- Landing hero: PSLV visible clearly, gradient from left
-- Login page: PSLV more subdued/blurred, centered radial glow accents, focus on the glossy card
+### Files to Modify
+- `src/pages/Login.tsx` — reduce overlay opacity, boost glow accents
+- `src/pages/Signup.tsx` — replace background and card styling to match Login
 
