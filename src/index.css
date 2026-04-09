@@ -140,4 +140,8 @@
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
 }
