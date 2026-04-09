@@ -5,11 +5,12 @@ import { Link } from "react-router-dom";
 
 const navLinks = [
   { label: "Home", href: "#home" },
+  { label: "About", href: "#about" },
   { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
-  
+  { label: "Insights", href: "#insights" },
+  { label: "FAQ", href: "#faq" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Contact", href: "#contact" },
 ];
 
 const Navbar = () => {
@@ -43,7 +44,7 @@ const Navbar = () => {
             <a
               key={l.href}
               href={l.href}
-              className="px-4 py-2 text-sm text-muted-foreground hover:text-primary transition-colors rounded-full hover:bg-muted/30"
+              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors rounded-full hover:bg-muted/30"
             >
               {l.label}
             </a>
