@@ -37,7 +37,7 @@ const AboutUs = () => {
               <span className="gradient-text">Launch Monitoring</span>
             </h2>
             <p className="text-muted-foreground leading-relaxed">
-              AegisSpace AI combines real-time ESP32 hardware telemetry with advanced artificial intelligence to provide mission-critical monitoring for satellite launches. Our platform detects anomalies before they become failures, ensuring every mission stays on track.
+              AegisSpace AI combines real-time FLARE module hardware telemetry with advanced artificial intelligence to provide mission-critical monitoring for satellite launches. Our platform detects anomalies before they become failures, ensuring every mission stays on track.
             </p>
             <p className="text-muted-foreground leading-relaxed">
               From predictive failure analysis to a stunning 3D digital twin dashboard, we deliver the tools space teams need to make confident, data-driven decisions in real time.

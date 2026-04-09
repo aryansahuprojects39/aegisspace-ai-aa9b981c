@@ -8,7 +8,7 @@ import stepAi from "@/assets/step-ai.jpg";
 import stepMonitor from "@/assets/step-monitor.jpg";
 
 const steps = [
-  { icon: Cpu, label: "ESP32", desc: "Sensors collect telemetry", image: stepEsp32 },
+  { icon: Cpu, label: "FLARE", desc: "Sensors collect telemetry", image: stepEsp32 },
   { icon: Webhook, label: "n8n", desc: "Webhook processes data", image: stepWebhook },
   { icon: Database, label: "Cloud DB", desc: "Store & validate", image: stepDatabase },
   { icon: Brain, label: "AI Engine", desc: "Detect anomalies", image: stepAi },
@@ -60,7 +60,7 @@ const HowItWorks = () => {
                   <img
                     src={step.image}
                     alt={step.label}
-                    loading="lazy"
+                    loading="eager"
                     width={256}
                     height={160}
                     className="w-full h-36 object-cover"

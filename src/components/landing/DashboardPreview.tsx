@@ -32,7 +32,7 @@ const DashboardPreview = () => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Wifi className="w-4 h-4 text-primary" />
-                <span>ESP32 Status</span>
+                <span>FLARE Status</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Signal className="w-4 h-4 text-primary" />
@@ -45,7 +45,7 @@ const DashboardPreview = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-muted animate-pulse" />
-              <span className="text-xs text-muted-foreground">Waiting for ESP32 data…</span>
+              <span className="text-xs text-muted-foreground">Waiting for FLARE data…</span>
             </div>
           </div>
 
@@ -67,7 +67,7 @@ const DashboardPreview = () => {
                 <div className="w-10 h-10 rounded-full bg-primary/10 animate-pulse" />
               </div>
               <span className="text-xs text-muted-foreground">3D Digital Twin</span>
-              <span className="text-[10px] text-muted-foreground/50 mt-1">Waiting for ESP32 data…</span>
+              <span className="text-[10px] text-muted-foreground/50 mt-1">Waiting for FLARE data…</span>
             </div>
 
             {/* AI panel */}

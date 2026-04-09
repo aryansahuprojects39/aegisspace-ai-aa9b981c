@@ -39,7 +39,7 @@ const TelemetryChart = ({ title, icon: Icon, dataKey, data, color }: {
     </div>
     {data.length === 0 ? (
       <div className="h-24 flex items-center justify-center border border-dashed border-border rounded-xl">
-        <span className="text-xs text-muted-foreground/50">Waiting for ESP32 data…</span>
+        <span className="text-xs text-muted-foreground/50">Waiting for FLARE data…</span>
       </div>
     ) : (
       <ChartContainer config={{ [dataKey]: { label: title, color } }} className="h-24 w-full">
@@ -87,7 +87,7 @@ const Dashboard = () => {
             <div className="hidden sm:flex items-center gap-4">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Wifi className="w-3.5 h-3.5 text-primary" />
-                <span>ESP32</span>
+                <span>FLARE</span>
                 <span className={`w-2 h-2 rounded-full ${telemetry.length > 0 ? "bg-primary" : "bg-muted"} animate-pulse`} />
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -133,7 +133,7 @@ const Dashboard = () => {
             </div>
             {telemetry.length === 0 ? (
               <div className="h-24 flex items-center justify-center border border-dashed border-border rounded-xl">
-                <span className="text-xs text-muted-foreground/50">Waiting for ESP32 data…</span>
+                <span className="text-xs text-muted-foreground/50">Waiting for FLARE data…</span>
               </div>
             ) : (
               <ChartContainer config={{ gyro_x: chartConfig.gyro_x, gyro_y: chartConfig.gyro_y, gyro_z: chartConfig.gyro_z }} className="h-24 w-full">
