@@ -1,6 +1,6 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Text, MeshDistortMaterial } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import * as THREE from "three";
 
 interface RocketProps {
@@ -40,7 +40,7 @@ function ExhaustParticles({ intensity = 1 }) {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial size={0.04} color="#6EF3FF" transparent opacity={0.7} sizeAttenuation />
     </points>
@@ -49,18 +49,16 @@ function ExhaustParticles({ intensity = 1 }) {
 
 function LaunchVehicle({ gyroX, gyroY, gyroZ, isAnomaly }: RocketProps) {
   const group = useRef<THREE.Group>(null);
-  const targetRotation = useRef({ x: 0, y: 0, z: 0 });
 
   useFrame((state, delta) => {
     if (!group.current) return;
-    // Smoothly interpolate to gyro values
-    targetRotation.current.x = (gyroX || 0) * 0.02;
-    targetRotation.current.y = (gyroY || 0) * 0.02;
-    targetRotation.current.z = (gyroZ || 0) * 0.02;
+    const tx = (gyroX || 0) * 0.02;
+    const ty = (gyroY || 0) * 0.02 + state.clock.elapsedTime * 0.1;
+    const tz = (gyroZ || 0) * 0.02;
 
-    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, targetRotation.current.x, delta * 2);
-    group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotation.current.y + state.clock.elapsedTime * 0.1, delta * 2);
-    group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, targetRotation.current.z, delta * 2);
+    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, tx, delta * 2);
+    group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, ty, delta * 2);
+    group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, tz, delta * 2);
     group.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
   });
 
@@ -90,7 +88,13 @@ function LaunchVehicle({ gyroX, gyroY, gyroZ, isAnomaly }: RocketProps) {
       {/* Main body / first stage */}
       <mesh position={[0, -0.5, 0]}>
         <cylinderGeometry args={[0.4, 0.45, 1.8, 32]} />
-        <MeshDistortMaterial color={bodyColor} emissive={emissiveColor} emissiveIntensity={isAnomaly ? 0.3 : 0.05} distort={isAnomaly ? 0.03 : 0} speed={2} metalness={0.8} roughness={0.2} />
+        <meshStandardMaterial
+          color={bodyColor}
+          emissive={emissiveColor}
+          emissiveIntensity={isAnomaly ? 0.3 : 0.05}
+          metalness={0.8}
+          roughness={0.2}
+        />
       </mesh>
 
       {/* Fins (4) */}
@@ -120,15 +124,18 @@ function LaunchVehicle({ gyroX, gyroY, gyroZ, isAnomaly }: RocketProps) {
 
 function StarsBackground() {
   const ref = useRef<THREE.Points>(null);
+  const count = 500;
   const positions = useMemo(() => {
-    const pos = new Float32Array(500 * 3);
-    for (let i = 0; i < 500 * 3; i++) pos[i] = (Math.random() - 0.5) * 30;
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i++) pos[i] = (Math.random() - 0.5) * 30;
     return pos;
   }, []);
   useFrame((_, d) => { if (ref.current) ref.current.rotation.y += d * 0.005; });
   return (
     <points ref={ref}>
-      <bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+      </bufferGeometry>
       <pointsMaterial size={0.02} color="#6EF3FF" transparent opacity={0.5} sizeAttenuation />
     </points>
   );
@@ -144,16 +151,16 @@ interface DigitalTwinProps {
 const RocketDigitalTwin = ({ gyroX = 0, gyroY = 0, gyroZ = 0, isAnomaly = false }: DigitalTwinProps) => {
   return (
     <div className="w-full h-full min-h-[280px]">
-      <Canvas camera={{ position: [0, 0, 7], fov: 40 }} dpr={[1, 2]}>
-        <fog attach="fog" args={["#0B0F2F", 8, 25]} />
-        <ambientLight intensity={0.3} />
-        <pointLight position={[5, 5, 5]} intensity={1} color="#6EF3FF" />
-        <pointLight position={[-3, -2, 3]} intensity={0.5} color="#FF6EC7" />
-        <spotLight position={[0, 8, 0]} intensity={0.5} angle={0.3} penumbra={1} color="#ffffff" />
-        <Float speed={1} rotationIntensity={0.1} floatIntensity={0.2}>
+      <Canvas camera={{ position: [0, 0, 7], fov: 40 }} dpr={[1, 1.5]}>
+        <Suspense fallback={null}>
+          <fog attach="fog" args={["#0B0F2F", 8, 25]} />
+          <ambientLight intensity={0.3} />
+          <pointLight position={[5, 5, 5]} intensity={1} color="#6EF3FF" />
+          <pointLight position={[-3, -2, 3]} intensity={0.5} color="#FF6EC7" />
+          <spotLight position={[0, 8, 0]} intensity={0.5} angle={0.3} penumbra={1} color="#ffffff" />
           <LaunchVehicle gyroX={gyroX} gyroY={gyroY} gyroZ={gyroZ} isAnomaly={isAnomaly} />
-        </Float>
-        <StarsBackground />
+          <StarsBackground />
+        </Suspense>
       </Canvas>
     </div>
   );
