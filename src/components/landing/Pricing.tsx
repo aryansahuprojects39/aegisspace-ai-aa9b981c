@@ -5,8 +5,10 @@ import { Check, Sparkles } from "lucide-react";
 const plans = [
   {
     name: "Starter",
-    monthly: 29,
-    yearly: 24,
+    monthly: 19,
+    discountedMonthly: 15,
+    yearly: 189,
+    yearlyOriginal: 228,
     desc: "Basic monitoring for small projects",
     features: [
       "1 FLARE Module",
@@ -22,7 +24,9 @@ const plans = [
   {
     name: "Pro",
     monthly: 79,
-    yearly: 66,
+    discountedMonthly: 63,
+    yearly: 749,
+    yearlyOriginal: 948,
     desc: "AI-powered detection for serious missions",
     features: [
       "Up to 10 FLARE Modules",
@@ -39,7 +43,9 @@ const plans = [
   {
     name: "Enterprise",
     monthly: null,
+    discountedMonthly: null,
     yearly: null,
+    yearlyOriginal: null,
     desc: "Full system with API & custom integrations",
     features: [
       "Unlimited FLARE Modules",
