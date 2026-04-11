@@ -102,7 +102,7 @@ const Login = () => {
                   className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
                 <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                  I agree to the <a href="#" className="text-primary hover:underline">Terms & Conditions</a>
+                  I agree to the <Link to="/terms" className="text-primary hover:underline">Terms & Conditions</Link>
                 </label>
               </div>
               <div className="flex items-start gap-2">
@@ -113,7 +113,7 @@ const Login = () => {
                   className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
                 <label htmlFor="privacy" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                  I agree to the <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+                  I agree to the <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                 </label>
               </div>
             </div>
