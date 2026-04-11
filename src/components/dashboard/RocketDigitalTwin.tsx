@@ -150,8 +150,23 @@ interface DigitalTwinProps {
 
 const RocketDigitalTwin = ({ gyroX = 0, gyroY = 0, gyroZ = 0, isAnomaly = false }: DigitalTwinProps) => {
   return (
-    <div className="w-full h-full min-h-[280px]">
-      <Canvas camera={{ position: [0, 0, 7], fov: 40 }} dpr={[1, 1.5]}>
+    <div className="w-full h-full min-h-[280px]" style={{ touchAction: "none" }}>
+      <Canvas camera={{ position: [0, 0, 7], fov: 40 }} dpr={[1, 1.5]} style={{ touchAction: "none" }} events={(store) => {
+        const state = (store as any).__r3f || store;
+        return {
+          ...state,
+          priority: 0,
+          enabled: true,
+          compute: (event: any, root: any) => {
+            root.pointer.set(
+              (event.offsetX / root.size.width) * 2 - 1,
+              -(event.offsetY / root.size.height) * 2 + 1
+            );
+            root.raycaster.setFromCamera(root.pointer, root.camera);
+          },
+          connected: undefined,
+        };
+      }}>
         <Suspense fallback={null}>
           <fog attach="fog" args={["#0B0F2F", 8, 25]} />
           <ambientLight intensity={0.3} />
