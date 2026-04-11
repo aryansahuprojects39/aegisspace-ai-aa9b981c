@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Rocket } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import logo from "@/assets/aegisspace-logo.png";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
