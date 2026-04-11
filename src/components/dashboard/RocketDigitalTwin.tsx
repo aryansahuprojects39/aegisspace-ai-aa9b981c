@@ -1,5 +1,5 @@
-import { useRef, useMemo, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useRef, useMemo, Suspense, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -67,56 +67,36 @@ function LaunchVehicle({ gyroX, gyroY, gyroZ, isAnomaly }: RocketProps) {
 
   return (
     <group ref={group}>
-      {/* Nose cone */}
       <mesh position={[0, 2.2, 0]}>
         <coneGeometry args={[0.35, 1, 32]} />
         <meshStandardMaterial color="#E8E8E8" emissive={emissiveColor} emissiveIntensity={0.1} metalness={0.9} roughness={0.1} />
       </mesh>
-
-      {/* Upper stage */}
       <mesh position={[0, 1.2, 0]}>
         <cylinderGeometry args={[0.35, 0.4, 1.2, 32]} />
         <meshStandardMaterial color={bodyColor} metalness={0.8} roughness={0.2} emissive={emissiveColor} emissiveIntensity={0.05} />
       </mesh>
-
-      {/* Interstage band */}
       <mesh position={[0, 0.5, 0]}>
         <cylinderGeometry args={[0.42, 0.42, 0.15, 32]} />
         <meshStandardMaterial color="#333" metalness={0.9} roughness={0.1} />
       </mesh>
-
-      {/* Main body / first stage */}
       <mesh position={[0, -0.5, 0]}>
         <cylinderGeometry args={[0.4, 0.45, 1.8, 32]} />
-        <meshStandardMaterial
-          color={bodyColor}
-          emissive={emissiveColor}
-          emissiveIntensity={isAnomaly ? 0.3 : 0.05}
-          metalness={0.8}
-          roughness={0.2}
-        />
+        <meshStandardMaterial color={bodyColor} emissive={emissiveColor} emissiveIntensity={isAnomaly ? 0.3 : 0.05} metalness={0.8} roughness={0.2} />
       </mesh>
-
-      {/* Fins (4) */}
       {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle, i) => (
         <mesh key={i} position={[Math.cos(angle) * 0.45, -1.3, Math.sin(angle) * 0.45]} rotation={[0, -angle, 0.3]}>
           <boxGeometry args={[0.02, 0.6, 0.35]} />
           <meshStandardMaterial color="#555" metalness={0.9} roughness={0.1} emissive={emissiveColor} emissiveIntensity={0.1} />
         </mesh>
       ))}
-
-      {/* Engine bell */}
       <mesh position={[0, -1.6, 0]}>
         <cylinderGeometry args={[0.3, 0.5, 0.4, 32, 1, true]} />
         <meshStandardMaterial color="#444" metalness={0.95} roughness={0.05} side={THREE.DoubleSide} />
       </mesh>
-
-      {/* Engine glow */}
       <mesh position={[0, -1.9, 0]}>
         <sphereGeometry args={[0.35, 32, 32]} />
         <meshStandardMaterial color="#6EF3FF" emissive="#6EF3FF" emissiveIntensity={isAnomaly ? 4 : 2} transparent opacity={0.5} />
       </mesh>
-
       <ExhaustParticles intensity={isAnomaly ? 2 : 1} />
     </group>
   );
@@ -141,6 +121,17 @@ function StarsBackground() {
   );
 }
 
+/** Disable all R3F pointer events so the canvas never captures touch gestures. */
+function DisablePointerEvents() {
+  const { gl } = useThree();
+  useEffect(() => {
+    const canvas = gl.domElement;
+    canvas.style.touchAction = "pan-y";
+    canvas.style.pointerEvents = "none";
+  }, [gl]);
+  return null;
+}
+
 interface DigitalTwinProps {
   gyroX?: number;
   gyroY?: number;
@@ -150,24 +141,18 @@ interface DigitalTwinProps {
 
 const RocketDigitalTwin = ({ gyroX = 0, gyroY = 0, gyroZ = 0, isAnomaly = false }: DigitalTwinProps) => {
   return (
-    <div className="w-full h-full min-h-[280px]" style={{ touchAction: "none" }}>
-      <Canvas camera={{ position: [0, 0, 7], fov: 40 }} dpr={[1, 1.5]} style={{ touchAction: "none" }} events={(store) => {
-        const state = (store as any).__r3f || store;
-        return {
-          ...state,
-          priority: 0,
-          enabled: true,
-          compute: (event: any, root: any) => {
-            root.pointer.set(
-              (event.offsetX / root.size.width) * 2 - 1,
-              -(event.offsetY / root.size.height) * 2 + 1
-            );
-            root.raycaster.setFromCamera(root.pointer, root.camera);
-          },
-          connected: undefined,
-        };
-      }}>
+    <div
+      className="w-full h-full min-h-[280px] relative"
+      style={{ touchAction: "pan-y" }}
+    >
+      <Canvas
+        camera={{ position: [0, 0, 7], fov: 40 }}
+        dpr={[1, 1.5]}
+        style={{ touchAction: "pan-y", pointerEvents: "none" }}
+        frameloop="always"
+      >
         <Suspense fallback={null}>
+          <DisablePointerEvents />
           <fog attach="fog" args={["#0B0F2F", 8, 25]} />
           <ambientLight intensity={0.3} />
           <pointLight position={[5, 5, 5]} intensity={1} color="#6EF3FF" />
