@@ -5,8 +5,10 @@ import { Check, Sparkles } from "lucide-react";
 const plans = [
   {
     name: "Starter",
-    monthly: 29,
-    yearly: 24,
+    monthly: 19,
+    discountedMonthly: 15,
+    yearly: 189,
+    yearlyOriginal: 228,
     desc: "Basic monitoring for small projects",
     features: [
       "1 FLARE Module",
@@ -22,7 +24,9 @@ const plans = [
   {
     name: "Pro",
     monthly: 79,
-    yearly: 66,
+    discountedMonthly: 63,
+    yearly: 749,
+    yearlyOriginal: 948,
     desc: "AI-powered detection for serious missions",
     features: [
       "Up to 10 FLARE Modules",
@@ -39,7 +43,9 @@ const plans = [
   {
     name: "Enterprise",
     monthly: null,
+    discountedMonthly: null,
     yearly: null,
+    yearlyOriginal: null,
     desc: "Full system with API & custom integrations",
     features: [
       "Unlimited FLARE Modules",
@@ -95,7 +101,7 @@ const Pricing = () => {
           </button>
           <span className={`text-sm ${isYearly ? "text-foreground font-semibold" : "text-muted-foreground"}`}>Yearly</span>
           {isYearly && (
-            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Save 17%</span>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Save 20%</span>
           )}
         </motion.div>
 
@@ -114,9 +120,13 @@ const Pricing = () => {
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan, i) => {
-            const price = isYearly ? plan.yearly : plan.monthly;
-            const isCustom = price === null;
-            const firstMonthPrice = price ? Math.round(price * 0.8) : null;
+            const isCustom = plan.monthly === null;
+            const displayPrice = isYearly
+              ? plan.yearly
+              : plan.discountedMonthly;
+            const originalPrice = isYearly
+              ? plan.yearlyOriginal
+              : plan.monthly;
 
             return (
               <motion.div
@@ -149,14 +159,20 @@ const Pricing = () => {
                   {isCustom ? (
                     <span className="text-4xl font-bold font-heading text-foreground">Custom</span>
                   ) : (
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold font-heading text-foreground">${firstMonthPrice}</span>
-                      <span className="text-sm text-muted-foreground line-through">${price}</span>
-                      <span className="text-muted-foreground text-sm">/{isYearly ? "mo" : "mo"}</span>
+                    <div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold font-heading text-foreground">
+                          ${isYearly ? displayPrice : displayPrice}
+                        </span>
+                        <span className="text-sm text-muted-foreground line-through">${originalPrice}</span>
+                        <span className="text-muted-foreground text-sm">/{isYearly ? "yr" : "mo"}</span>
+                      </div>
+                      <p className="text-[10px] text-primary mt-1">
+                        {isYearly
+                          ? `Save 20% — was $${originalPrice}/yr`
+                          : `First month only, then $${plan.monthly}/mo`}
+                      </p>
                     </div>
-                  )}
-                  {!isCustom && (
-                    <p className="text-[10px] text-primary mt-1">First month only, then ${price}/mo</p>
                   )}
                 </div>
 
