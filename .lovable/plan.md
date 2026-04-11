@@ -1,25 +1,34 @@
 
 
-# Login Background Fix + Signup Page Redesign
+# Login/Signup Enhancements Plan
 
-## Issue Found
-The Login page's PSLV background is invisible because the overlay (`bg-background/75`) is too opaque, combined with `blur-sm` on the image. The background blends entirely into the dark theme.
+## 1. Add Logo Image as Reference-Inspired SVG Logo
+- Copy the uploaded logo to `src/assets/aegisspace-logo.png`
+- Replace the Rocket icon + gradient box in Login, Signup, and Navbar with an `<img>` tag using the logo
+- Size: ~40px in auth pages, ~36px in navbar
 
-## Changes
+## 2. Google Authentication
+- Use the Configure Social Auth tool to generate the `src/integrations/lovable` module
+- Add a "Continue with Google" button on both Login and Signup pages using `lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin })`
+- Style: outline button with Google icon, separator ("or continue with email"), placed above the email form
 
-### 1. Fix Login Background Visibility (`src/pages/Login.tsx`)
-- Reduce the main overlay from `bg-background/75` to `bg-background/50`
-- Reduce the gradient overlay opacity
-- Increase the image `scale-110` slightly and reduce `blur-sm` to allow more detail through
-- Boost the radial glow accents from `bg-primary/8` to `bg-primary/15` for visible color pops
+## 3. Password Strength Checker (Signup only)
+- Add a `PasswordStrengthIndicator` component (`src/components/PasswordStrength.tsx`)
+- Checks: length >= 8, uppercase, lowercase, number, special char
+- Visual: 4-segment bar (red/orange/yellow/green) + label (Weak/Fair/Good/Strong)
+- Renders below the password input on the Signup page
 
-### 2. Update Signup Page to Match Login Design (`src/pages/Signup.tsx`)
-- Replace `ParallaxStars` background with the same PSLV hero image background (with slightly different overlay tint to differentiate)
-- Replace `glass-strong` card with `glass-login` card + animated gradient border wrapper (same as Login)
-- Match input styling: `bg-muted/20 border-border/30` instead of `bg-muted/30 border-border/50`
-- Keep existing form fields (Display Name, Email, Password) and signup logic unchanged
+## 4. Skeleton Loading Pages
+- Replace the spinner in `ProtectedRoute.tsx` with a skeleton layout resembling the Dashboard (header bar, sidebar placeholders, content grid)
+- Use the existing `Skeleton` component from shadcn
 
-### Files to Modify
-- `src/pages/Login.tsx` — reduce overlay opacity, boost glow accents
-- `src/pages/Signup.tsx` — replace background and card styling to match Login
+## Files to Create
+- `src/components/PasswordStrength.tsx`
+- `src/assets/aegisspace-logo.png` (copy from upload)
+
+## Files to Modify
+- `src/pages/Login.tsx` — add Google button, logo image, divider
+- `src/pages/Signup.tsx` — add Google button, logo image, password strength indicator, divider
+- `src/components/ProtectedRoute.tsx` — replace spinner with skeleton layout
+- `src/components/landing/Navbar.tsx` — use logo image
 
