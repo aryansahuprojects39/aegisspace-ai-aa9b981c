@@ -21,6 +21,7 @@ const TelemetryGridSection = ({ data, loading }: Props) => (
       normalRange="15–45 °C"
       data={data}
       loading={loading}
+      thresholds={{ low: 15, high: 45, warningLow: 10, warningHigh: 50, criticalLow: 0, criticalHigh: 60 }}
     />
     <TelemetryGraph
       title="Voltage"
@@ -31,6 +32,7 @@ const TelemetryGridSection = ({ data, loading }: Props) => (
       normalRange="3.0–5.0 V"
       data={data}
       loading={loading}
+      thresholds={{ low: 3.0, high: 5.0, warningLow: 2.5, warningHigh: 5.5, criticalLow: 2.0, criticalHigh: 6.0 }}
     />
     <TelemetryGraph
       title="Current"
@@ -41,6 +43,7 @@ const TelemetryGridSection = ({ data, loading }: Props) => (
       normalRange="0.1–2.0 A"
       data={data}
       loading={loading}
+      thresholds={{ low: 0.1, high: 2.0, warningLow: 0.05, warningHigh: 2.5, criticalLow: 0, criticalHigh: 3.0 }}
     />
     <GyroscopeGraph data={data} loading={loading} />
   </div>
