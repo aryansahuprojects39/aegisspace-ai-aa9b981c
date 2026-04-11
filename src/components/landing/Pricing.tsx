@@ -120,9 +120,13 @@ const Pricing = () => {
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan, i) => {
-            const price = isYearly ? plan.yearly : plan.monthly;
-            const isCustom = price === null;
-            const firstMonthPrice = price ? Math.round(price * 0.8) : null;
+            const isCustom = plan.monthly === null;
+            const displayPrice = isYearly
+              ? plan.yearly
+              : plan.discountedMonthly;
+            const originalPrice = isYearly
+              ? plan.yearlyOriginal
+              : plan.monthly;
 
             return (
               <motion.div
@@ -155,14 +159,20 @@ const Pricing = () => {
                   {isCustom ? (
                     <span className="text-4xl font-bold font-heading text-foreground">Custom</span>
                   ) : (
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold font-heading text-foreground">${firstMonthPrice}</span>
-                      <span className="text-sm text-muted-foreground line-through">${price}</span>
-                      <span className="text-muted-foreground text-sm">/{isYearly ? "mo" : "mo"}</span>
+                    <div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold font-heading text-foreground">
+                          ${isYearly ? displayPrice : displayPrice}
+                        </span>
+                        <span className="text-sm text-muted-foreground line-through">${originalPrice}</span>
+                        <span className="text-muted-foreground text-sm">/{isYearly ? "yr" : "mo"}</span>
+                      </div>
+                      <p className="text-[10px] text-primary mt-1">
+                        {isYearly
+                          ? `Save 20% — was $${originalPrice}/yr`
+                          : `First month only, then $${plan.monthly}/mo`}
+                      </p>
                     </div>
-                  )}
-                  {!isCustom && (
-                    <p className="text-[10px] text-primary mt-1">First month only, then ${price}/mo</p>
                   )}
                 </div>
 
