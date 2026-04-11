@@ -1,4 +1,5 @@
 import { Rocket } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -34,13 +35,26 @@ const Footer = () => {
             <div key={col.title}>
               <h4 className="font-heading font-semibold text-foreground mb-4 text-sm">{col.title}</h4>
               <ul className="space-y-2">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {col.links.map((link) => {
+                  const linkMap: Record<string, string> = {
+                    "Privacy Policy": "/privacy",
+                    "Terms of Service": "/terms",
+                  };
+                  const to = linkMap[link];
+                  return (
+                    <li key={link}>
+                      {to ? (
+                        <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                          {link}
+                        </Link>
+                      ) : (
+                        <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                          {link}
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

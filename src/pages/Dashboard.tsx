@@ -7,54 +7,12 @@ import {
 } from "lucide-react";
 import ParallaxStars from "@/components/landing/ParallaxStars";
 import { useTelemetry } from "@/hooks/useTelemetry";
-import {
-  ChartContainer, ChartTooltip, ChartTooltipContent
-} from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import RocketDigitalTwin from "@/components/dashboard/RocketDigitalTwin";
+import TelemetryGridSection from "@/components/dashboard/TelemetryGridSection";
 import AIAnalysisPanel from "@/components/dashboard/AIAnalysisPanel";
 import DeviceConnectivity from "@/components/dashboard/DeviceConnectivity";
 import { useAnomalyNotifications } from "@/hooks/useAnomalyNotifications";
 
-const chartConfig = {
-  temperature: { label: "Temp (°C)", color: "hsl(0, 80%, 60%)" },
-  voltage: { label: "Voltage (V)", color: "hsl(185, 100%, 71%)" },
-  current: { label: "Current (A)", color: "hsl(320, 100%, 71%)" },
-  gyro_x: { label: "X", color: "hsl(185, 100%, 71%)" },
-  gyro_y: { label: "Y", color: "hsl(320, 100%, 71%)" },
-  gyro_z: { label: "Z", color: "hsl(260, 60%, 60%)" },
-};
-
-const TelemetryChart = ({ title, icon: Icon, dataKey, data, color }: {
-  title: string; icon: React.ElementType; dataKey: string; data: any[]; color: string;
-}) => (
-  <div className="glass rounded-2xl p-4 card-tilt">
-    <div className="flex items-center gap-2 mb-3">
-      <Icon className="w-4 h-4 text-primary" />
-      <span className="text-xs font-semibold text-foreground">{title}</span>
-      {data.length > 0 && (
-        <span className="ml-auto text-xs font-mono text-primary">
-          {data[data.length - 1]?.[dataKey]?.toFixed(1) ?? "—"}
-        </span>
-      )}
-    </div>
-    {data.length === 0 ? (
-      <div className="h-24 flex items-center justify-center border border-dashed border-border rounded-xl">
-        <span className="text-xs text-muted-foreground/50">Waiting for FLARE data…</span>
-      </div>
-    ) : (
-      <ChartContainer config={{ [dataKey]: { label: title, color } }} className="h-24 w-full">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsla(240,20%,30%,0.3)" />
-          <XAxis dataKey="created_at" hide />
-          <YAxis hide domain={["auto", "auto"]} />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} />
-        </LineChart>
-      </ChartContainer>
-    )}
-  </div>
-);
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
