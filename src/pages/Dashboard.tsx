@@ -14,6 +14,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import RocketDigitalTwin from "@/components/dashboard/RocketDigitalTwin";
 import AIAnalysisPanel from "@/components/dashboard/AIAnalysisPanel";
 import DeviceConnectivity from "@/components/dashboard/DeviceConnectivity";
+import { useAnomalyNotifications } from "@/hooks/useAnomalyNotifications";
 
 const chartConfig = {
   temperature: { label: "Temp (°C)", color: "hsl(0, 80%, 60%)" },
