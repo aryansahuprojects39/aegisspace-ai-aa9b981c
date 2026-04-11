@@ -2,8 +2,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Wifi, Signal, Clock, Activity, Thermometer,
-  Zap, RotateCcw, LogOut, User, Radio, Rocket
+  Wifi, Signal, Clock, Activity,
+  LogOut, User, Radio, Rocket
 } from "lucide-react";
 import ParallaxStars from "@/components/landing/ParallaxStars";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -17,7 +17,7 @@ import { useAnomalyNotifications } from "@/hooks/useAnomalyNotifications";
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { data: telemetry } = useTelemetry(50);
+  const { data: telemetry, loading: telemetryLoading } = useTelemetry(30);
   useAnomalyNotifications();
   const latest = telemetry.length > 0 ? telemetry[telemetry.length - 1] : null;
   const hasAnomaly = latest?.is_anomaly;
@@ -79,35 +79,9 @@ const Dashboard = () => {
 
       {/* Main Grid */}
       <main className="relative z-10 p-4 lg:p-6">
-        {/* Charts Row */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <TelemetryChart title="Temperature" icon={Thermometer} dataKey="temperature" data={telemetry} color="hsl(0, 80%, 60%)" />
-          <TelemetryChart title="Voltage" icon={Zap} dataKey="voltage" data={telemetry} color="hsl(185, 100%, 71%)" />
-          <TelemetryChart title="Current" icon={Activity} dataKey="current" data={telemetry} color="hsl(320, 100%, 71%)" />
-          <div className="glass rounded-2xl p-4 card-tilt">
-            <div className="flex items-center gap-2 mb-3">
-              <RotateCcw className="w-4 h-4 text-primary" />
-              <span className="text-xs font-semibold text-foreground">Gyroscope</span>
-            </div>
-            {telemetry.length === 0 ? (
-              <div className="h-24 flex items-center justify-center border border-dashed border-border rounded-xl">
-                <span className="text-xs text-muted-foreground/50">Waiting for FLARE data…</span>
-              </div>
-            ) : (
-              <ChartContainer config={{ gyro_x: chartConfig.gyro_x, gyro_y: chartConfig.gyro_y, gyro_z: chartConfig.gyro_z }} className="h-24 w-full">
-                <LineChart data={telemetry}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsla(240,20%,30%,0.3)" />
-                  <XAxis dataKey="created_at" hide />
-                  <YAxis hide domain={["auto", "auto"]} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="gyro_x" stroke="hsl(185, 100%, 71%)" strokeWidth={1.5} dot={false} />
-                  <Line type="monotone" dataKey="gyro_y" stroke="hsl(320, 100%, 71%)" strokeWidth={1.5} dot={false} />
-                  <Line type="monotone" dataKey="gyro_z" stroke="hsl(260, 60%, 60%)" strokeWidth={1.5} dot={false} />
-                </LineChart>
-              </ChartContainer>
-            )}
-          </div>
+        {/* Telemetry Graphs */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <TelemetryGridSection data={telemetry} loading={telemetryLoading} />
         </motion.div>
 
         {/* Digital Twin + AI Panel */}
