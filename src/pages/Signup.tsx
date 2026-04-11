@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import PasswordStrength from "@/components/PasswordStrength";
 import pslvHero from "@/assets/pslv-hero.jpg";
@@ -18,9 +19,20 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+
+  const validateTerms = () => {
+    if (!termsAccepted || !privacyAccepted) {
+      toast.error("Please accept both Terms & Conditions and Privacy Policy");
+      return false;
+    }
+    return true;
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateTerms()) return;
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters");
       return;
@@ -44,6 +56,7 @@ const Signup = () => {
   };
 
   const handleGoogleSignup = async () => {
+    if (!validateTerms()) return;
     setGoogleLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
@@ -93,6 +106,33 @@ const Signup = () => {
             <h1 className="text-2xl font-bold font-heading text-center text-foreground mb-2">Create Account</h1>
             <p className="text-sm text-muted-foreground text-center mb-6">Join mission control today</p>
 
+            {/* T&C Checkboxes — required before any sign-up method */}
+            <div className="space-y-3 mb-6">
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="terms"
+                  checked={termsAccepted}
+                  onCheckedChange={(c) => setTermsAccepted(c === true)}
+                  className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                />
+                <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                  I agree to the <a href="#" className="text-primary hover:underline">Terms & Conditions</a>
+                </label>
+              </div>
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="privacy"
+                  checked={privacyAccepted}
+                  onCheckedChange={(c) => setPrivacyAccepted(c === true)}
+                  className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                />
+                <label htmlFor="privacy" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                  I agree to the <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+                </label>
+              </div>
+            </div>
+
+            {/* Google Button */}
             <button
               type="button"
               onClick={handleGoogleSignup}
