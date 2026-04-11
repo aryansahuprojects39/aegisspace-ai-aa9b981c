@@ -101,7 +101,7 @@ const Pricing = () => {
           </button>
           <span className={`text-sm ${isYearly ? "text-foreground font-semibold" : "text-muted-foreground"}`}>Yearly</span>
           {isYearly && (
-            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Save 17%</span>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Save 20%</span>
           )}
         </motion.div>
 
