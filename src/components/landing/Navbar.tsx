@@ -34,9 +34,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto flex items-center justify-between px-4 lg:px-8">
         <a href="#home" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-lg gradient-cyan-pink flex items-center justify-center">
-            <Rocket className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src={logo} alt="AegisSpace AI" className="w-9 h-9 rounded-lg object-contain" />
           <span className="text-lg font-bold font-heading text-foreground">
             Aegis<span className="gradient-text">Space</span> AI
           </span>
