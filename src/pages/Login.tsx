@@ -5,7 +5,6 @@ import { lovable } from "@/integrations/lovable/index";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import pslvHero from "@/assets/pslv-hero.jpg";
 import logo from "@/assets/aegisspace-logo.png";
@@ -17,15 +16,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!termsAccepted || !privacyAccepted) {
-      toast.error("Please accept both Terms & Conditions and Privacy Policy");
-      return;
-    }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
@@ -37,10 +30,6 @@ const Login = () => {
   };
 
   const handleGoogleLogin = async () => {
-    if (!termsAccepted || !privacyAccepted) {
-      toast.error("Please accept both Terms & Conditions and Privacy Policy");
-      return;
-    }
     setGoogleLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
@@ -80,7 +69,6 @@ const Login = () => {
           />
 
           <div className="glass-login rounded-3xl p-8 lg:p-10 relative">
-            {/* Logo */}
             <div className="flex items-center justify-center gap-2 mb-8">
               <img src={logo} alt="AegisSpace AI" className="w-10 h-10 rounded-xl object-contain" />
               <span className="text-xl font-bold font-heading text-foreground">
@@ -91,7 +79,6 @@ const Login = () => {
             <h1 className="text-2xl font-bold font-heading text-center text-foreground mb-2">Welcome Back</h1>
             <p className="text-sm text-muted-foreground text-center mb-6">Sign in to your mission control</p>
 
-            {/* Google Button */}
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -107,7 +94,6 @@ const Login = () => {
               {googleLoading ? "Signing in…" : "Continue with Google"}
             </button>
 
-            {/* Divider */}
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-border/30" />
               <span className="text-xs text-muted-foreground">or continue with email</span>
@@ -145,31 +131,6 @@ const Login = () => {
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-start gap-2">
-                  <Checkbox
-                    id="terms"
-                    checked={termsAccepted}
-                    onCheckedChange={(c) => setTermsAccepted(c === true)}
-                    className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                    I agree to the <a href="#" className="text-primary hover:underline">Terms & Conditions</a>
-                  </label>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Checkbox
-                    id="privacy"
-                    checked={privacyAccepted}
-                    onCheckedChange={(c) => setPrivacyAccepted(c === true)}
-                    className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <label htmlFor="privacy" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                    I agree to the <a href="#" className="text-primary hover:underline">Privacy Policy</a>
-                  </label>
                 </div>
               </div>
 
