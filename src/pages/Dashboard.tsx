@@ -60,7 +60,7 @@ const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: telemetry } = useTelemetry(50);
-
+  useAnomalyNotifications();
   const latest = telemetry.length > 0 ? telemetry[telemetry.length - 1] : null;
   const hasAnomaly = latest?.is_anomaly;
   const statusColor = !latest ? "bg-muted" : hasAnomaly ? "bg-destructive" : "bg-primary";
