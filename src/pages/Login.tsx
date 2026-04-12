@@ -92,32 +92,6 @@ const Login = () => {
             <h1 className="text-2xl font-bold font-heading text-center text-foreground mb-2">Welcome Back</h1>
             <p className="text-sm text-muted-foreground text-center mb-6">Sign in to your mission control</p>
 
-            {/* T&C Checkboxes — required before any sign-in method */}
-            <div className="space-y-3 mb-6">
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(c) => setTermsAccepted(c === true)}
-                  className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                  I agree to the <Link to="/terms" className="text-primary hover:underline">Terms & Conditions</Link>
-                </label>
-              </div>
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="privacy"
-                  checked={privacyAccepted}
-                  onCheckedChange={(c) => setPrivacyAccepted(c === true)}
-                  className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <label htmlFor="privacy" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                  I agree to the <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
-                </label>
-              </div>
-            </div>
-
             {/* Google Button */}
             <button
               type="button"
@@ -171,6 +145,32 @@ const Login = () => {
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
+                </div>
+              </div>
+
+              {/* T&C Checkboxes — after password */}
+              <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="terms"
+                    checked={termsAccepted}
+                    onCheckedChange={(c) => setTermsAccepted(c === true)}
+                    className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
+                  <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                    I agree to the <Link to="/terms" className="text-primary hover:underline">Terms & Conditions</Link>
+                  </label>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="privacy"
+                    checked={privacyAccepted}
+                    onCheckedChange={(c) => setPrivacyAccepted(c === true)}
+                    className="mt-0.5 border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
+                  <label htmlFor="privacy" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                    I agree to the <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                  </label>
                 </div>
               </div>
 
