@@ -16,18 +16,38 @@ const TIME_RANGES = [
   { label: "All", points: 50 },
 ] as const;
 
+function linearExtrapolate(data: any[], key: string, projCount: number) {
+  if (data.length < 5) return [];
+  const last5 = data.slice(-5).map((d: any, i: number) => ({ x: i, y: d[key] as number })).filter(p => p.y != null);
+  if (last5.length < 2) return [];
+  const n = last5.length;
+  const sumX = last5.reduce((a, p) => a + p.x, 0);
+  const sumY = last5.reduce((a, p) => a + p.y, 0);
+  const sumXY = last5.reduce((a, p) => a + p.x * p.y, 0);
+  const sumXX = last5.reduce((a, p) => a + p.x * p.x, 0);
+  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+  const lastX = last5[last5.length - 1].x;
+  const results: Record<string, any>[] = [];
+  for (let i = 1; i <= projCount; i++) {
+    results.push({ [key]: intercept + slope * (lastX + i) });
+  }
+  return results;
+}
+
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
+  if (d?._projected) return null;
   return (
     <div className="rounded-xl border border-border/30 bg-card/90 backdrop-blur-md px-3 py-2 text-xs shadow-lg">
-      <p className="text-muted-foreground mb-1">{new Date(d.created_at).toLocaleTimeString()}</p>
+      {d?.created_at && <p className="text-muted-foreground mb-1">{new Date(d.created_at).toLocaleTimeString()}</p>}
       {payload.map((p: any) => (
         <p key={p.dataKey} style={{ color: p.color }} className="font-mono">
           {p.name}: {p.value?.toFixed(2)}°/s
         </p>
       ))}
-      {d.is_anomaly && <p className="text-destructive font-semibold mt-1">⚠ Anomaly Detected</p>}
+      {d?.is_anomaly && <p className="text-destructive font-semibold mt-1">⚠ Anomaly Detected</p>}
     </div>
   );
 };
@@ -43,6 +63,22 @@ const GyroscopeGraph = ({ data, loading }: { data: TelemetryRow[]; loading: bool
   const toggleAxis = (axis: keyof typeof visibleAxes) => {
     setVisibleAxes((prev) => ({ ...prev, [axis]: !prev[axis] }));
   };
+
+  // Build chart data with projected points
+  const chartData = useMemo(() => {
+    if (visibleData.length < 5) return visibleData;
+    const projX = linearExtrapolate(visibleData, "gyro_x", 2);
+    const projY = linearExtrapolate(visibleData, "gyro_y", 2);
+    const projZ = linearExtrapolate(visibleData, "gyro_z", 2);
+    const projected = [0, 1].map(i => ({
+      created_at: `proj_${i}`,
+      _projected: true,
+      gyro_x: projX[i]?.gyro_x ?? null,
+      gyro_y: projY[i]?.gyro_y ?? null,
+      gyro_z: projZ[i]?.gyro_z ?? null,
+    }));
+    return [...visibleData, ...projected];
+  }, [visibleData]);
 
   const anomalyTimestamps = useMemo(
     () => visibleData.filter((d) => d.is_anomaly).map((d) => d.created_at),
@@ -79,7 +115,6 @@ const GyroscopeGraph = ({ data, loading }: { data: TelemetryRow[]; loading: bool
 
       {/* Controls row */}
       <div className="flex items-center justify-between mb-2">
-        {/* Time range */}
         <div className="flex gap-1">
           {TIME_RANGES.map((r) => (
             <button
@@ -91,7 +126,6 @@ const GyroscopeGraph = ({ data, loading }: { data: TelemetryRow[]; loading: bool
             </button>
           ))}
         </div>
-        {/* Legend toggles */}
         <div className="flex gap-1.5">
           {(Object.keys(COLORS) as Array<keyof typeof COLORS>).map((axis) => (
             <button
@@ -120,7 +154,15 @@ const GyroscopeGraph = ({ data, loading }: { data: TelemetryRow[]; loading: bool
         ) : (
           <motion.div key="chart" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-36">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={visibleData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+              <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+                <defs>
+                  {(Object.keys(COLORS) as Array<keyof typeof COLORS>).map((axis) => (
+                    <linearGradient key={axis} id={`stroke-${axis}`} x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={COLORS[axis]} stopOpacity={0.3} />
+                      <stop offset="100%" stopColor={COLORS[axis]} stopOpacity={1} />
+                    </linearGradient>
+                  ))}
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 20% 30% / 0.15)" />
                 <XAxis dataKey="created_at" hide />
                 <YAxis domain={["auto", "auto"]} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} width={35} />
@@ -128,9 +170,9 @@ const GyroscopeGraph = ({ data, loading }: { data: TelemetryRow[]; loading: bool
                 {anomalyTimestamps.map((ts) => (
                   <ReferenceLine key={ts} x={ts} stroke="hsl(0, 80%, 55%)" strokeDasharray="4 4" strokeOpacity={0.5} />
                 ))}
-                {visibleAxes.gyro_x && <Line type="monotone" dataKey="gyro_x" name="X" stroke={COLORS.gyro_x} strokeWidth={1.5} dot={false} animationDuration={400} />}
-                {visibleAxes.gyro_y && <Line type="monotone" dataKey="gyro_y" name="Y" stroke={COLORS.gyro_y} strokeWidth={1.5} dot={false} animationDuration={400} />}
-                {visibleAxes.gyro_z && <Line type="monotone" dataKey="gyro_z" name="Z" stroke={COLORS.gyro_z} strokeWidth={1.5} dot={false} animationDuration={400} />}
+                {visibleAxes.gyro_x && <Line type="monotone" dataKey="gyro_x" name="X" stroke={`url(#stroke-gyro_x)`} strokeWidth={1.5} dot={false} animationDuration={400} connectNulls={false} />}
+                {visibleAxes.gyro_y && <Line type="monotone" dataKey="gyro_y" name="Y" stroke={`url(#stroke-gyro_y)`} strokeWidth={1.5} dot={false} animationDuration={400} connectNulls={false} />}
+                {visibleAxes.gyro_z && <Line type="monotone" dataKey="gyro_z" name="Z" stroke={`url(#stroke-gyro_z)`} strokeWidth={1.5} dot={false} animationDuration={400} connectNulls={false} />}
               </LineChart>
             </ResponsiveContainer>
           </motion.div>
