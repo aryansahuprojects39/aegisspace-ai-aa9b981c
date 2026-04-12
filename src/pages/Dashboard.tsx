@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Wifi, Signal, Clock, Activity,
-  LogOut, User, Radio, Rocket
+  LogOut, User, Radio, Rocket, Download
 } from "lucide-react";
 import ParallaxStars from "@/components/landing/ParallaxStars";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -12,12 +12,12 @@ import TelemetryGridSection from "@/components/dashboard/TelemetryGridSection";
 import AIAnalysisPanel from "@/components/dashboard/AIAnalysisPanel";
 import DeviceConnectivity from "@/components/dashboard/DeviceConnectivity";
 import { useAnomalyNotifications } from "@/hooks/useAnomalyNotifications";
-
+import { useCallback } from "react";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { data: telemetry, loading: telemetryLoading } = useTelemetry(30);
+  const { data: telemetry, loading: telemetryLoading } = useTelemetry(50);
   useAnomalyNotifications();
   const latest = telemetry.length > 0 ? telemetry[telemetry.length - 1] : null;
   const hasAnomaly = latest?.is_anomaly;
@@ -28,6 +28,32 @@ const Dashboard = () => {
     await signOut();
     navigate("/");
   };
+
+  const handleExportCSV = useCallback(() => {
+    if (telemetry.length === 0) return;
+    const headers = ["timestamp", "temperature", "voltage", "current", "gyro_x", "gyro_y", "gyro_z", "is_anomaly", "anomaly_reason"];
+    const rows = telemetry.map((r) =>
+      [
+        r.created_at,
+        r.temperature ?? "",
+        r.voltage ?? "",
+        r.current ?? "",
+        r.gyro_x ?? "",
+        r.gyro_y ?? "",
+        r.gyro_z ?? "",
+        r.is_anomaly,
+        r.anomaly_reason ?? "",
+      ].join(",")
+    );
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aegis-telemetry-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [telemetry]);
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
@@ -61,6 +87,16 @@ const Dashboard = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportCSV}
+              disabled={telemetry.length === 0}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Export telemetry as CSV"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Export</span>
+            </button>
+            <div className="h-4 w-px bg-border" />
             <div className="flex items-center gap-2">
               <div className={`w-4 h-4 rounded-full ${statusColor} animate-pulse`} />
               <span className="text-xs text-muted-foreground hidden sm:inline">{statusLabel}</span>

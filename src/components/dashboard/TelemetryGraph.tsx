@@ -1,6 +1,6 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, ReferenceArea
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
@@ -44,17 +44,48 @@ function getStatus(value: number | null, thresholds?: ThresholdZone): "Normal" |
   return "Normal";
 }
 
-const CustomTooltip = ({ active, payload, unit, normalRange, thresholds }: any) => {
+function getInsight(status: "Normal" | "Warning" | "Critical", title: string): string {
+  if (status === "Normal") return "Within normal operating range";
+  if (status === "Warning") return `${title} approaching threshold`;
+  return `Critical — check ${title.toLowerCase()} sensor`;
+}
+
+function linearExtrapolate(data: any[], key: string, projCount: number) {
+  if (data.length < 5) return [];
+  const last5 = data.slice(-5).map((d: any, i: number) => ({ x: i, y: d[key] as number })).filter(p => p.y != null);
+  if (last5.length < 2) return [];
+  const n = last5.length;
+  const sumX = last5.reduce((a, p) => a + p.x, 0);
+  const sumY = last5.reduce((a, p) => a + p.y, 0);
+  const sumXY = last5.reduce((a, p) => a + p.x * p.y, 0);
+  const sumXX = last5.reduce((a, p) => a + p.x * p.x, 0);
+  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+  const lastX = last5[last5.length - 1].x;
+  const results = [];
+  for (let i = 1; i <= projCount; i++) {
+    results.push({
+      created_at: `proj_${i}`,
+      [key]: intercept + slope * (lastX + i),
+      _projected: true,
+    });
+  }
+  return results;
+}
+
+const CustomTooltip = ({ active, payload, unit, normalRange, thresholds, title }: any) => {
   if (!active || !payload?.[0]) return null;
   const d = payload[0].payload;
+  if (d._projected) return null;
   const val = payload[0].value;
   const status = getStatus(val, thresholds);
   const statusColors = { Normal: "text-primary", Warning: "text-yellow-400", Critical: "text-destructive" };
   return (
-    <div className="rounded-xl border border-border/30 bg-card/90 backdrop-blur-md px-3 py-2 text-xs shadow-lg min-w-[140px]">
+    <div className="rounded-xl border border-border/30 bg-card/90 backdrop-blur-md px-3 py-2 text-xs shadow-lg min-w-[160px]">
       <p className="text-foreground font-semibold">{val?.toFixed(2)} {unit}</p>
       <p className="text-muted-foreground">{new Date(d.created_at).toLocaleTimeString()}</p>
       <p className={`font-medium ${statusColors[status]}`}>{status}</p>
+      <p className="text-muted-foreground/70 text-[10px] mt-0.5 italic">{getInsight(status, title)}</p>
       {normalRange && <p className="text-muted-foreground/60 mt-0.5">Range: {normalRange}</p>}
       {d.is_anomaly && <p className="text-destructive font-semibold mt-1">⚠ Anomaly Detected</p>}
     </div>
@@ -82,20 +113,17 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
   const latestValue = visibleData.length > 0 ? (visibleData[visibleData.length - 1] as any)?.[dataKey] : null;
   const prevValue = visibleData.length > 1 ? (visibleData[visibleData.length - 2] as any)?.[dataKey] : null;
   const hasAnomaly = visibleData.length > 0 && visibleData[visibleData.length - 1]?.is_anomaly;
-  const gradientId = `grad-${dataKey}`;
+  const fillGradientId = `fill-${dataKey}`;
+  const strokeGradientId = `stroke-${dataKey}`;
 
   const changePercent = useMemo(() => {
     if (latestValue == null || prevValue == null || prevValue === 0) return null;
     return ((latestValue - prevValue) / Math.abs(prevValue)) * 100;
   }, [latestValue, prevValue]);
 
-  const trendData = useMemo(() => {
-    if (visibleData.length < 3) return null;
-    const last3 = visibleData.slice(-3).map((d: any) => d[dataKey] as number).filter(Boolean);
-    if (last3.length < 2) return null;
-    const avg = last3.reduce((a, b) => a + b, 0) / last3.length;
-    const slope = (last3[last3.length - 1] - last3[0]) / last3.length;
-    return { value: avg + slope * 2 };
+  const chartData = useMemo(() => {
+    const projected = linearExtrapolate(visibleData, dataKey, 2);
+    return [...visibleData, ...projected];
   }, [visibleData, dataKey]);
 
   const anomalyTimestamps = useMemo(
@@ -168,17 +196,21 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
         ) : (
           <motion.div key="chart" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-36">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={visibleData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+              <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                 <defs>
-                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id={fillGradientId} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={color} stopOpacity={0.25} />
                     <stop offset="100%" stopColor={color} stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id={strokeGradientId} x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+                    <stop offset="100%" stopColor={color} stopOpacity={1} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 20% 30% / 0.15)" />
                 <XAxis dataKey="created_at" hide />
                 <YAxis domain={["auto", "auto"]} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} width={35} />
-                <Tooltip content={<CustomTooltip unit={unit} normalRange={normalRange} thresholds={thresholds} />} />
+                <Tooltip content={<CustomTooltip unit={unit} normalRange={normalRange} thresholds={thresholds} title={title} />} />
 
                 {/* Threshold zones */}
                 {thresholds && (
@@ -194,16 +226,18 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
                   <ReferenceLine key={ts} x={ts} stroke="hsl(0, 80%, 55%)" strokeDasharray="4 4" strokeOpacity={0.5} />
                 ))}
 
+                {/* Main area with gradient stroke */}
                 <Area
                   type="monotone"
                   dataKey={dataKey}
-                  stroke={color}
+                  stroke={`url(#${strokeGradientId})`}
                   strokeWidth={2}
-                  fill={`url(#${gradientId})`}
+                  fill={`url(#${fillGradientId})`}
                   dot={<AnomalyDot />}
                   activeDot={{ r: 4, stroke: color, strokeWidth: 2, fill: "hsl(var(--background))" }}
                   animationDuration={400}
                   isAnimationActive
+                  connectNulls={false}
                 />
               </AreaChart>
             </ResponsiveContainer>
