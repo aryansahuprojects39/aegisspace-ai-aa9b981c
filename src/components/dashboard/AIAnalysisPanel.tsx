@@ -49,7 +49,7 @@ const AIAnalysisPanel = ({ telemetry }: AIAnalysisPanelProps) => {
       if (!analysis) runAnalysis();
     }, 3000);
     return () => clearTimeout(timer);
-  }, [telemetry.length]);
+  }, [telemetry.length, runAnalysis, analysis]);
 
   const statusIcon = analysis?.status === "critical" ? XCircle :
     analysis?.status === "warning" ? AlertTriangle : CheckCircle;

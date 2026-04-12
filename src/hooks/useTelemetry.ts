@@ -7,6 +7,7 @@ type TelemetryRow = Tables<"telemetry_data">;
 export function useTelemetry(limit = 50) {
   const [data, setData] = useState<TelemetryRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Initial fetch
@@ -15,8 +16,13 @@ export function useTelemetry(limit = 50) {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(limit)
-      .then(({ data: rows }) => {
-        if (rows) setData(rows.reverse());
+      .then(({ data: rows, error: fetchError }) => {
+        if (fetchError) {
+          console.error("useTelemetry fetch error:", fetchError.message);
+          setError(fetchError.message);
+        } else if (rows) {
+          setData(rows.reverse());
+        }
         setLoading(false);
       });
 
@@ -38,5 +44,5 @@ export function useTelemetry(limit = 50) {
     return () => { supabase.removeChannel(channel); };
   }, [limit]);
 
-  return { data, loading };
+  return { data, loading, error };
 }

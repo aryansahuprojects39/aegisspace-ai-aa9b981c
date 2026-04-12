@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Skills and documentation
+skills/
+graphify-out/
+
+# Environment variables — never commit secrets
+.env
+.env.local
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
