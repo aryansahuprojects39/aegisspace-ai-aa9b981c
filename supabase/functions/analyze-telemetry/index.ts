@@ -1,11 +1,10 @@
-// Supabase Edge Function: analyze-telemetry
-// Deploy: npx supabase functions deploy analyze-telemetry
-//
-// NOTE on Deno imports:
-// supabase-edge-runtime does NOT expose Deno.serve() as a global.
-// Use the explicit std import below. Pin to 0.224.0 (current stable).
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+// AegisSpace — analyze-telemetry Edge Function
+// AI backend: Anthropic Claude (claude-sonnet-4-6) called directly.
+// Secret required: ANTHROPIC_API_KEY
+// Set via: npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-... \
+//            --project-ref uidfafhxwjrdxngicaro
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,21 +13,17 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-// Matches real DB schema: telemetry_readings columns
 interface TelemetryReading {
   id: string;
   device_id: string;
-  temperature1: number;
-  temperature2: number;
-  voltage: number;
-  current: number;
-  vibration: number;
-  rf_signal: number;
-  motion_detected: boolean | null;
-  rf_interference: boolean | null;
-  status: string | null;
-  anomaly_score: number | null;
-  sabotage_probability: number | null;
+  temperature: number | null;
+  voltage: number | null;
+  current: number | null;
+  gyro_x: number | null;
+  gyro_y: number | null;
+  gyro_z: number | null;
+  is_anomaly: boolean;
+  anomaly_reason: string | null;
   created_at: string;
 }
 
@@ -69,7 +64,7 @@ async function fetchWithTimeout(
   }
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -89,99 +84,96 @@ serve(async (req: Request) => {
     return json({ error: "Invalid JSON body." }, 400);
   }
 
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) {
-    console.error("analyze-telemetry: LOVABLE_API_KEY not set");
+  // --- Secret ---
+  const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!ANTHROPIC_API_KEY) {
+    console.error("analyze-telemetry: ANTHROPIC_API_KEY not set");
     return json({ error: "Server misconfiguration." }, 500);
   }
 
-  // --- Build prompt using real column names ---
-  const anomalies = telemetryData.filter(
-    (r) => r.status === "warning" || r.status === "critical" || (r.anomaly_score ?? 0) > 0,
-  );
-  const recent = telemetryData.slice(-5);
+  // --- Build prompt ---
+  const anomalies = telemetryData.filter((r) => r.is_anomaly);
+  const recent    = telemetryData.slice(-5);
 
   const prompt =
     `You are AegisSpace AI, an expert satellite launch telemetry analyst.\n` +
-    `Analyse the following ESP32 FLARE sensor readings and return a concise assessment.\n\n` +
-    `Total readings: ${telemetryData.length}\n` +
-    `Anomalies flagged: ${anomalies.length}\n` +
+    `Analyse the following ESP32 FLARE sensor readings and return a concise mission assessment.\n\n` +
+    `Total readings in session: ${telemetryData.length}\n` +
+    `Anomalies flagged: ${anomalies.length}\n\n` +
     `Last 5 readings:\n${JSON.stringify(recent, null, 2)}\n\n` +
-    `Fields: temperature1/temperature2 (°C), voltage (V), current (A), ` +
-    `vibration, rf_signal, motion_detected, rf_interference, ` +
-    `status, anomaly_score (0-1), sabotage_probability (0-1).\n\n` +
-    `Respond ONLY with a valid JSON object - no markdown fences:\n` +
+    `Fields: temperature (degC), voltage (V), current (A), ` +
+    `gyro_x/y/z (deg/s), is_anomaly, anomaly_reason.\n\n` +
+    `Normal operating ranges: temp 15-70C, voltage 3.0-5.5V, ` +
+    `current 0-2A, gyro magnitude < 250 deg/s.\n\n` +
+    `Respond ONLY with a valid JSON object. No markdown fences. No explanation outside JSON:\n` +
     `{\n` +
     `  "status": "nominal" | "warning" | "critical",\n` +
-    `  "summary": "<one-line status>",\n` +
-    `  "details": "<2-3 sentences>",\n` +
+    `  "summary": "<one concise line>",\n` +
+    `  "details": "<2-3 sentences of analysis>",\n` +
     `  "risks": ["<risk1>", "<risk2>"],\n` +
-    `  "recommendation": "<single action>"\n` +
+    `  "recommendation": "<single most important action>"\n` +
     `}`;
 
-  // --- Call AI gateway ---
+  // --- Call Anthropic API directly ---
   let aiResponse: Response;
   try {
     aiResponse = await fetchWithTimeout(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      "https://api.anthropic.com/v1/messages",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
+          "x-api-key":         ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "content-type":      "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.0-flash",
+          model:      "claude-sonnet-4-6",
           max_tokens: 512,
-          temperature: 0.2,
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are a spacecraft telemetry analyst AI. Respond with valid JSON only. No markdown.",
-            },
-            { role: "user", content: prompt },
-          ],
+          system:     "You are a spacecraft telemetry analyst AI. Always respond with valid JSON only. Never include markdown code fences or any text outside the JSON object.",
+          messages: [{ role: "user", content: prompt }],
         }),
       },
-      15_000,
+      20_000, // 20 s — Anthropic can be slower than gateway
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes("aborted")) {
-      return json({ error: "AI gateway timed out. Retry shortly." }, 504);
+      console.error("analyze-telemetry: Anthropic API timed out");
+      return json({ error: "AI timed out. Retry shortly." }, 504);
     }
-    console.error("analyze-telemetry fetch error:", msg);
-    return json({ error: "Failed to reach AI gateway." }, 502);
+    console.error("analyze-telemetry: fetch error:", msg);
+    return json({ error: "Failed to reach Anthropic API." }, 502);
   }
 
   if (!aiResponse.ok) {
     const s = aiResponse.status;
+    const body = await aiResponse.json().catch(() => ({}));
+    console.error(`analyze-telemetry: Anthropic returned ${s}`, body);
     if (s === 429) return json({ error: "Rate limited. Retry shortly." }, 429);
-    if (s === 402) return json({ error: "AI credits exhausted." }, 402);
-    if (s === 401) return json({ error: "AI gateway auth failed." }, 500);
-    return json({ error: `AI gateway error: ${s}` }, 502);
+    if (s === 401) return json({ error: "Anthropic API key invalid." }, 500);
+    if (s === 400) return json({ error: "Bad request to Anthropic API." }, 500);
+    return json({ error: `Anthropic API error: ${s}` }, 502);
   }
 
-  // --- Parse AI response ---
+  // --- Parse Anthropic response ---
+  // Anthropic format: { content: [{ type: "text", text: "..." }] }
   let analysis: AnalysisResponse;
   try {
-    const result = await aiResponse.json();
-    const content: string = result.choices?.[0]?.message?.content ?? "{}";
+    const result  = await aiResponse.json();
+    const content: string = result.content?.[0]?.text ?? "{}";
     const cleaned = content.replace(/```(?:json)?/g, "").trim();
-    const match = cleaned.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("No JSON in response");
-    const parsed = JSON.parse(match[0]) as Partial<AnalysisResponse>;
+    const match   = cleaned.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("No JSON object found in Claude response");
+    const parsed  = JSON.parse(match[0]) as Partial<AnalysisResponse>;
     analysis = {
       status:
         parsed.status === "warning" || parsed.status === "critical"
           ? parsed.status
           : "nominal",
-      summary: typeof parsed.summary === "string" ? parsed.summary : content,
-      details: typeof parsed.details === "string" ? parsed.details : "",
-      risks: Array.isArray(parsed.risks) ? parsed.risks : [],
-      recommendation:
-        typeof parsed.recommendation === "string" ? parsed.recommendation : "",
+      summary:        typeof parsed.summary        === "string" ? parsed.summary        : content,
+      details:        typeof parsed.details        === "string" ? parsed.details        : "",
+      risks:          Array.isArray(parsed.risks)               ? parsed.risks          : [],
+      recommendation: typeof parsed.recommendation === "string" ? parsed.recommendation : "",
     };
   } catch (e) {
     console.warn("analyze-telemetry: parse failed:", e);
