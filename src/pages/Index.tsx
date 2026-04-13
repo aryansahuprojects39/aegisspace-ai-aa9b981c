@@ -1,16 +1,18 @@
-import Navbar from "@/components/landing/Navbar";
-import Hero from "@/components/landing/Hero";
-import Partners from "@/components/landing/Partners";
-import AboutUs from "@/components/landing/AboutUs";
-import Features from "@/components/landing/Features";
-import HowItWorks from "@/components/landing/HowItWorks";
-import Insights from "@/components/landing/Insights";
-import Reviews from "@/components/landing/Reviews";
-import FAQ from "@/components/landing/FAQ";
-import Pricing from "@/components/landing/Pricing";
-import Footer from "@/components/landing/Footer";
-import ContactUs from "@/components/landing/ContactUs";
-import ParallaxStars from "@/components/landing/ParallaxStars";
+import {
+  Navbar,
+  Hero,
+  Partners,
+  AboutUs,
+  Features,
+  HowItWorks,
+  Insights,
+  Reviews,
+  FAQ,
+  Pricing,
+  Footer,
+  ContactUs,
+  ParallaxStars,
+} from "@/components";
 
 const Index = () => {
   return (

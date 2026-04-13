@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { supabase, lovable } from "@/integrations";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import PasswordStrength from "@/components/PasswordStrength";
+import { PasswordStrength } from "@/components";
 import pslvHero from "@/assets/pslv-hero.jpg";
 import logo from "@/assets/aegisspace-logo.png";
 

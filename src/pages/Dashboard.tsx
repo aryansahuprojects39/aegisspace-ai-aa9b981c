@@ -1,17 +1,18 @@
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Wifi, Signal, Clock, Activity,
   LogOut, User, Radio, Rocket, Download
 } from "lucide-react";
-import ParallaxStars from "@/components/landing/ParallaxStars";
-import { useTelemetry } from "@/hooks/useTelemetry";
-import RocketDigitalTwin from "@/components/dashboard/RocketDigitalTwin";
-import TelemetryGridSection from "@/components/dashboard/TelemetryGridSection";
-import AIAnalysisPanel from "@/components/dashboard/AIAnalysisPanel";
-import DeviceConnectivity from "@/components/dashboard/DeviceConnectivity";
-import { useAnomalyNotifications } from "@/hooks/useAnomalyNotifications";
+import {
+  ParallaxStars,
+  RocketDigitalTwin,
+  TelemetryGridSection,
+  AIAnalysisPanel,
+  DeviceConnectivity,
+} from "@/components";
+import { useTelemetry, useAnomalyNotifications } from "@/hooks";
 import { useCallback } from "react";
 
 const Dashboard = () => {

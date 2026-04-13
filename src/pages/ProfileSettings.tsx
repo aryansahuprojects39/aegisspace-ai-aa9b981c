@@ -1,14 +1,14 @@
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, User, Save, Camera, Lock, Bell } from "lucide-react";
-import ParallaxStars from "@/components/landing/ParallaxStars";
+import { ParallaxStars } from "@/components";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 

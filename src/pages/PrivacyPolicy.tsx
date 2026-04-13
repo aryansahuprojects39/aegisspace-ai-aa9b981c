@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import ParallaxStars from "@/components/landing/ParallaxStars";
+import { ParallaxStars } from "@/components";
 
 const PrivacyPolicy = () => (
   <div className="relative min-h-screen bg-background">

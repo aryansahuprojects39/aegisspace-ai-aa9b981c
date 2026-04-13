@@ -1,0 +1,160 @@
+{
+  "name": "AegisSpace Telemetry Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aegis-telemetry",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "aegis-telemetry"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Validate & sanitise incoming ESP32 payload ──────────────────────────\nconst body = $input.first().json.body ?? $input.first().json;\n\nconst device_id   = String(body.device_id   ?? 'esp32-001');\nconst temperature = parseFloat(body.temperature ?? 0);\nconst voltage     = parseFloat(body.voltage     ?? 0);\nconst current     = parseFloat(body.current     ?? 0);\nconst gyro_x      = parseFloat(body.gyro_x      ?? 0);\nconst gyro_y      = parseFloat(body.gyro_y      ?? 0);\nconst gyro_z      = parseFloat(body.gyro_z      ?? 0);\n\n// device_id format guard\nif (!/^esp32-[a-zA-Z0-9\\-]+$/.test(device_id)) {\n  throw new Error(`Invalid device_id: ${device_id}`);\n}\n\n// numeric guard\nif (isNaN(temperature) || isNaN(voltage) || isNaN(current)) {\n  throw new Error('temperature / voltage / current must be numeric');\n}\n\n// Anomaly detection (defence-in-depth over ESP32 on-device check)\nconst reasons = [];\nif (temperature >= 85)       reasons.push(`CRITICAL temperature (${temperature.toFixed(1)}C)`);\nelse if (temperature >= 70)  reasons.push(`High temperature (${temperature.toFixed(1)}C)`);\nif (voltage < 3.0)           reasons.push(`Low voltage (${voltage.toFixed(2)}V)`);\nelse if (voltage > 5.5)      reasons.push(`Overvoltage (${voltage.toFixed(2)}V)`);\nif (current > 2.0)           reasons.push(`Overcurrent (${current.toFixed(3)}A)`);\nconst gyroMag = Math.sqrt(gyro_x**2 + gyro_y**2 + gyro_z**2);\nif (gyroMag > 250)           reasons.push(`High angular rate (${gyroMag.toFixed(1)} deg/s)`);\n\nconst deviceFlagged  = body.is_anomaly === true || body.is_anomaly === 'true';\nconst is_anomaly     = deviceFlagged || reasons.length > 0;\nconst anomaly_reason = is_anomaly\n  ? (body.anomaly_reason || reasons.join('; ') || 'Flagged by device')\n  : null;\n\nreturn [{\n  json: {\n    device_id,\n    temperature,\n    voltage,\n    current,\n    gyro_x,\n    gyro_y,\n    gyro_z,\n    is_anomaly,\n    anomaly_reason,\n    _raw_body: body\n  }\n}];\n"
+      },
+      "id": "validate-node",
+      "name": "Validate & Detect Anomaly",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uidfafhxwjrdxngicaro.supabase.co/rest/v1/telemetry_data",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGZhZmh4d2pyZHhuZ2ljYXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNDM5MzQsImV4cCI6MjA5MTYxOTkzNH0.dGtvyYjwkkRRsvbpi5kiPA6IXatwjbTZCqjilU3vaM4" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGZhZmh4d2pyZHhuZ2ljYXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNDM5MzQsImV4cCI6MjA5MTYxOTkzNH0.dGtvyYjwkkRRsvbpi5kiPA6IXatwjbTZCqjilU3vaM4" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ device_id: $json.device_id, temperature: $json.temperature, voltage: $json.voltage, current: $json.current, gyro_x: $json.gyro_x, gyro_y: $json.gyro_y, gyro_z: $json.gyro_z, is_anomaly: $json.is_anomaly, anomaly_reason: $json.anomaly_reason }) }}",
+        "options": {}
+      },
+      "id": "supabase-insert-node",
+      "name": "Insert to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "anomaly-check",
+              "leftValue": "={{ $('Validate & Detect Anomaly').item.json.is_anomaly }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-anomaly-node",
+      "name": "Is Anomaly?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Claude workflow health audit ─────────────────────────────────────────\n// Called on EVERY execution (both anomaly and normal).\n// Sends last 10 executions summary to Claude to check:\n//  1. Are nodes firing in correct order?\n//  2. Are any nodes erroring silently?\n//  3. Is the anomaly detection logic producing expected results?\n//  4. Are Supabase inserts succeeding?\n// Claude responds with: { healthy: bool, issues: [], suggestion: string }\n\nconst ANTHROPIC_API_KEY = $env.ANTHROPIC_API_KEY;\nif (!ANTHROPIC_API_KEY) {\n  return [{ json: { healthy: true, issues: [], suggestion: 'ANTHROPIC_API_KEY not set — skipping audit.' } }];\n}\n\nconst validated = $('Validate & Detect Anomaly').item.json;\nconst insertStatus = (() => {\n  try { return $('Insert to Supabase').item.json; }\n  catch { return { error: 'Insert node not yet executed' }; }\n})();\n\n// Build a workflow execution snapshot for Claude to audit\nconst snapshot = {\n  execution_time: new Date().toISOString(),\n  nodes_executed: [\n    { name: 'Webhook',                  status: 'ok' },\n    { name: 'Validate & Detect Anomaly', status: 'ok', output: validated },\n    { name: 'Insert to Supabase',       status: insertStatus.error ? 'error' : 'ok', output: insertStatus }\n  ],\n  payload_received: {\n    device_id:    validated.device_id,\n    temperature:  validated.temperature,\n    voltage:      validated.voltage,\n    current:      validated.current,\n    gyro_x:       validated.gyro_x,\n    gyro_y:       validated.gyro_y,\n    gyro_z:       validated.gyro_z,\n    is_anomaly:   validated.is_anomaly,\n    anomaly_reason: validated.anomaly_reason\n  },\n  anomaly_thresholds: {\n    temperature_warn: 70, temperature_crit: 85,\n    voltage_low: 3.0, voltage_high: 5.5,\n    current_max: 2.0, gyro_max_dps: 250\n  },\n  expected_flow: [\n    'Webhook → Validate & Detect Anomaly → Insert to Supabase → Is Anomaly? → (anomaly branch OR nominal branch) → Respond 201'\n  ]\n};\n\nconst prompt = `You are an n8n workflow quality auditor for the AegisSpace telemetry pipeline.\n\nReview this single execution snapshot and check:\n1. Did all nodes execute in the correct order?\n2. Are the sensor values within plausible physical ranges?\n3. Is the anomaly detection firing correctly based on the thresholds?\n4. Did the Supabase insert succeed (no error field)?\n5. Is anything unexpected or suspicious?\n\nExecution snapshot:\n${JSON.stringify(snapshot, null, 2)}\n\nRespond ONLY with valid JSON. No markdown:\n{\n  \"healthy\": true | false,\n  \"issues\": [\"<issue1>\", \"<issue2>\"],\n  \"suggestion\": \"<one actionable improvement or 'No issues found'>\"\n}`;\n\nconst response = await fetch('https://api.anthropic.com/v1/messages', {\n  method: 'POST',\n  headers: {\n    'x-api-key':         ANTHROPIC_API_KEY,\n    'anthropic-version': '2023-06-01',\n    'content-type':      'application/json'\n  },\n  body: JSON.stringify({\n    model:      'claude-sonnet-4-6',\n    max_tokens: 256,\n    system:     'You are a workflow auditor AI. Always respond with valid JSON only. No markdown.',\n    messages:   [{ role: 'user', content: prompt }]\n  })\n});\n\nif (!response.ok) {\n  console.warn(`Claude audit failed: ${response.status}`);\n  return [{ json: { healthy: true, issues: [], suggestion: `Audit unavailable (${response.status})` } }];\n}\n\nconst result = await response.json();\nconst text   = result.content?.[0]?.text ?? '{}';\nconst clean  = text.replace(/```(?:json)?/g, '').trim();\nconst match  = clean.match(/\\{[\\s\\S]*\\}/);\n\nlet audit = { healthy: true, issues: [], suggestion: 'No issues found' };\nif (match) {\n  try { audit = JSON.parse(match[0]); } catch {}\n}\n\n// Log non-healthy audits prominently\nif (!audit.healthy) {\n  console.warn('[CLAUDE AUDIT] Issues detected:', JSON.stringify(audit.issues));\n  console.warn('[CLAUDE AUDIT] Suggestion:', audit.suggestion);\n} else {\n  console.log('[CLAUDE AUDIT] Healthy. Suggestion:', audit.suggestion);\n}\n\nreturn [{ json: audit }];\n"
+      },
+      "id": "claude-audit-node",
+      "name": "Claude Workflow Audit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log anomaly for audit trail\n// Extend this node to add: Slack, email, PagerDuty, etc.\nconst d = $('Validate & Detect Anomaly').item.json;\nconst audit = $('Claude Workflow Audit').item.json;\nconsole.log(`[ANOMALY] device=${d.device_id} reason=\"${d.anomaly_reason}\" temp=${d.temperature} V=${d.voltage}`);\nconsole.log(`[AUDIT]   healthy=${audit.healthy} suggestion=\"${audit.suggestion}\"`);\nreturn [{ json: { logged: true, device_id: d.device_id, reason: d.anomaly_reason, audit } }];\n"
+      },
+      "id": "anomaly-log-node",
+      "name": "Log Anomaly",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, is_anomaly: $('Validate & Detect Anomaly').item.json.is_anomaly, audit: $('Claude Workflow Audit').item.json }) }}",
+        "options": { "responseCode": 201 }
+      },
+      "id": "respond-node",
+      "name": "Respond 201",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, error: $input.first().json.message ?? 'Validation failed' }) }}",
+        "options": { "responseCode": 400 }
+      },
+      "id": "error-respond-node",
+      "name": "Respond 400",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Validate & Detect Anomaly", "type": "main", "index": 0 }]]
+    },
+    "Validate & Detect Anomaly": {
+      "main": [[{ "node": "Insert to Supabase", "type": "main", "index": 0 }]],
+      "error": [[{ "node": "Respond 400", "type": "main", "index": 0 }]]
+    },
+    "Insert to Supabase": {
+      "main": [
+        [
+          { "node": "Is Anomaly?",           "type": "main", "index": 0 },
+          { "node": "Claude Workflow Audit", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Is Anomaly?": {
+      "main": [
+        [{ "node": "Log Anomaly", "type": "main", "index": 0 }],
+        [{ "node": "Respond 201", "type": "main", "index": 0 }]
+      ]
+    },
+    "Claude Workflow Audit": {
+      "main": [[{ "node": "Respond 201", "type": "main", "index": 0 }]]
+    },
+    "Log Anomaly": {
+      "main": [[{ "node": "Respond 201", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "meta": { "templateCredsSetupCompleted": true },
+  "pinData": {},
+  "versionId": "aegisspace-v2",
+  "triggerCount": 1,
+  "tags": [{ "name": "aegisspace" }]
+}

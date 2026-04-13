@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Mail } from "lucide-react";
-import ParallaxStars from "@/components/landing/ParallaxStars";
+import { ParallaxStars } from "@/components";
 import { toast } from "sonner";
 
 const ForgotPassword = () => {
