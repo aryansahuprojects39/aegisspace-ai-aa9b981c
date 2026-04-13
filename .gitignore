@@ -20,6 +20,7 @@ graphify-out/
 .env
 .env.local
 .env.*.local
+secret_template.h
 
 # Editor directories and files
 .vscode/*

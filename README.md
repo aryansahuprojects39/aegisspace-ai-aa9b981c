@@ -6,7 +6,7 @@
 
 ![AegisSpace Dashboard](src/assets/feature-dashboard.jpg)
 
----
+______________________________________________________________________
 
 ## Overview
 
@@ -20,7 +20,7 @@ The platform detects anomalies automatically, displays a 3D digital twin
 of the launch vehicle, and provides AI-generated mission assessments on
 demand.
 
----
+______________________________________________________________________
 
 ## Features
 
@@ -42,23 +42,23 @@ demand.
 - **Responsive UI** — Glassmorphism design, parallax stars, mobile-friendly
   layout
 
----
+______________________________________________________________________
 
 ## Tech Stack
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | React 18, TypeScript, Vite |
-| Styling | Tailwind CSS, shadcn/ui, Framer Motion |
-| 3D Graphics | Three.js, React Three Fiber, Drei |
-| Backend | Supabase (Postgres, Auth, Realtime, Storage, Edge Functions) |
-| AI Engine | Google Gemini (via Lovable AI Gateway) |
-| Data Pipeline | n8n webhooks → ESP32 FLARE module |
-| Charts | Recharts |
-| Forms | React Hook Form + Zod |
-| Testing | Vitest, Playwright |
+| Layer         | Technology                                                   |
+| ------------- | ------------------------------------------------------------ |
+| Frontend      | React 18, TypeScript, Vite                                   |
+| Styling       | Tailwind CSS, shadcn/ui, Framer Motion                       |
+| 3D Graphics   | Three.js, React Three Fiber, Drei                            |
+| Backend       | Supabase (Postgres, Auth, Realtime, Storage, Edge Functions) |
+| AI Engine     | Google Gemini (via Lovable AI Gateway)                       |
+| Data Pipeline | n8n webhooks → ESP32 FLARE module                            |
+| Charts        | Recharts                                                     |
+| Forms         | React Hook Form + Zod                                        |
+| Testing       | Vitest, Playwright                                           |
 
----
+______________________________________________________________________
 
 ## Architecture
 
@@ -78,34 +78,34 @@ Supabase Edge Function: analyze-telemetry
    AI Panel (status / risks / recommendation)
 ```
 
----
+______________________________________________________________________
 
 ## Database Schema
 
 ### `telemetry_data`
 
-| Column | Type | Description |
-| --- | --- | --- |
-| `id` | UUID | Primary key |
-| `device_id` | TEXT | Hardware identifier (default: `esp32-001`) |
-| `temperature` | FLOAT8 | Temperature in °C |
-| `voltage` | FLOAT8 | Supply voltage (V) |
-| `current` | FLOAT8 | Current draw (A) |
-| `gyro_x/y/z` | FLOAT8 | Gyroscope axes (°/s) |
-| `is_anomaly` | BOOLEAN | Flagged by anomaly detection |
-| `anomaly_reason` | TEXT | Human-readable anomaly description |
-| `created_at` | TIMESTAMPTZ | Auto-set timestamp |
+| Column           | Type             | Description                                |
+| ---------------- | ---------------- | ------------------------------------------ |
+| `id`             | UUID             | Primary key                                |
+| `device_id`      | TEXT             | Hardware identifier (default: `esp32-001`) |
+| `temperature`    | DOUBLE PRECISION | Temperature in °C                          |
+| `voltage`        | DOUBLE PRECISION | Supply voltage (V)                         |
+| `current`        | DOUBLE PRECISION | Current draw (A)                           |
+| `gyro_x/y/z`     | DOUBLE PRECISION | Gyroscope axes (°/s)                       |
+| `is_anomaly`     | BOOLEAN          | Flagged by anomaly detection               |
+| `anomaly_reason` | TEXT             | Human-readable anomaly description         |
+| `created_at`     | TIMESTAMPTZ      | Auto-set timestamp                         |
 
 ### `profiles`
 
-| Column | Type | Description |
-| --- | --- | --- |
-| `user_id` | UUID | References `auth.users` |
-| `display_name` | TEXT | User display name |
-| `avatar_url` | TEXT | Public URL from Supabase Storage |
-| `bio` | TEXT | Optional bio |
+| Column         | Type | Description                      |
+| -------------- | ---- | -------------------------------- |
+| `user_id`      | UUID | References `auth.users`          |
+| `display_name` | TEXT | User display name                |
+| `avatar_url`   | TEXT | Public URL from Supabase Storage |
+| `bio`          | TEXT | Optional bio                     |
 
----
+______________________________________________________________________
 
 ## Getting Started
 
@@ -147,8 +147,8 @@ Or run the SQL files in `supabase/migrations/` manually via the Supabase
 SQL editor in order:
 
 1. `20260408200342_*.sql` — creates `profiles` table + auth trigger
-2. `20260408201036_*.sql` — creates `telemetry_data` table + realtime
-3. `20260411183219_*.sql` — creates `avatars` storage bucket
+1. `20260408201036_*.sql` — creates `telemetry_data` table + realtime
+1. `20260411183219_*.sql` — creates `avatars` storage bucket
 
 ### 4. Deploy Edge Function
 
@@ -170,9 +170,12 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173).
 
----
+______________________________________________________________________
 
 ## Sending Telemetry (ESP32 / n8n)
+
+See `esp32/flare_telemetry.ino` for the complete firmware source.
+Flash it to your FLARE module and configure `esp32/secrets.h` (copy from `secrets_template.h`).
 
 POST JSON to the Supabase REST API (or via n8n webhook):
 
@@ -198,7 +201,7 @@ Content-Type: application/json
 The RLS policy `Anyone can insert telemetry data` allows unauthenticated
 inserts — suitable for hardware devices that cannot hold a user session.
 
----
+______________________________________________________________________
 
 ## Scripts
 
@@ -212,7 +215,7 @@ npm run test         # Run Vitest unit tests
 npm run test:watch   # Vitest in watch mode
 ```
 
----
+______________________________________________________________________
 
 ## Project Structure
 
@@ -259,7 +262,7 @@ supabase/
 └── migrations/              # Ordered SQL migration files
 ```
 
----
+______________________________________________________________________
 
 ## Security Notes
 
@@ -272,11 +275,10 @@ supabase/
 - The `LOVABLE_API_KEY` is a server-side secret stored in Supabase Edge
   Function secrets, never shipped to the client.
 - RLS is enabled on both `telemetry_data` and `profiles`. Review policies
-  before going to production, especially `Anyone can insert telemetry
-  data` — consider restricting to a service-role key on your n8n server
-  in production.
+  before going to production, especially `Anyone can insert telemetry data` —
+  consider restricting to a service-role key on your n8n server in production.
 
----
+______________________________________________________________________
 
 ## Testing
 
@@ -285,7 +287,7 @@ npm run test           # Vitest unit tests (src/test/)
 npx playwright test    # E2E tests (playwright.config.ts)
 ```
 
----
+______________________________________________________________________
 
 ## License
 

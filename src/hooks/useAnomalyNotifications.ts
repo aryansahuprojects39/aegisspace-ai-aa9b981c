@@ -6,17 +6,70 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type TelemetryRow = Tables<"telemetry_data">;
 
+interface NotifPrefs {
+  anomalyAlerts: boolean;
+  soundAlerts: boolean;
+}
+
+const DEFAULT_PREFS: NotifPrefs = { anomalyAlerts: true, soundAlerts: true };
+
+/**
+ * Safe preference loader — never throws on corrupt localStorage data.
+ */
+function loadPrefs(userId: string): NotifPrefs {
+  try {
+    const raw = localStorage.getItem(`notif_prefs_${userId}`);
+    if (!raw) return DEFAULT_PREFS;
+    const parsed = JSON.parse(raw) as Partial<NotifPrefs>;
+    return {
+      anomalyAlerts: parsed.anomalyAlerts !== false,
+      soundAlerts:   parsed.soundAlerts   !== false,
+    };
+  } catch {
+    return DEFAULT_PREFS;
+  }
+}
+
+/**
+ * Play a short warning beep via Web Audio API.
+ * Reuses a single AudioContext per hook instance to avoid the browser's
+ * "too many AudioContext" limit hit by rapid anomalies.
+ */
+function playBeep(ctx: AudioContext) {
+  if (ctx.state === "suspended") {
+    ctx.resume().catch(() => {}); // user gesture may be needed first time
+  }
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.value  = 880;
+  osc.type             = "sine";
+  gain.gain.value      = 0.15;
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+  osc.stop(ctx.currentTime + 0.55);
+}
+
 export function useAnomalyNotifications() {
   const { user } = useAuth();
-  const seenIds = useRef(new Set<string>());
+  const seenIds   = useRef(new Set<string>());
+  const audioCtx  = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     if (!user) return;
 
-    const prefs = localStorage.getItem(`notif_prefs_${user.id}`);
-    const parsed = prefs ? JSON.parse(prefs) : { anomalyAlerts: true, soundAlerts: true };
+    const prefs = loadPrefs(user.id);
+    if (!prefs.anomalyAlerts) return;
 
-    if (!parsed.anomalyAlerts) return;
+    // Create one AudioContext for the lifetime of this subscription
+    if (prefs.soundAlerts && !audioCtx.current) {
+      try {
+        audioCtx.current = new AudioContext();
+      } catch {
+        // AudioContext not supported — silent degradation
+      }
+    }
 
     const channel = supabase
       .channel("anomaly-notifications")
@@ -25,36 +78,36 @@ export function useAnomalyNotifications() {
         { event: "INSERT", schema: "public", table: "telemetry_data" },
         (payload) => {
           const row = payload.new as TelemetryRow;
-          if (!row.is_anomaly) return;
+          if (!row.is_anomaly)          return;
           if (seenIds.current.has(row.id)) return;
           seenIds.current.add(row.id);
 
-          toast.error(`⚠️ Anomaly Detected — ${row.anomaly_reason || "Abnormal reading"}`, {
-            description: `Device: ${row.device_id} | Temp: ${row.temperature?.toFixed(1)}°C | V: ${row.voltage?.toFixed(1)}V`,
-            duration: 8000,
-          });
+          toast.error(
+            `⚠️ Anomaly — ${row.anomaly_reason ?? "Abnormal reading"}`,
+            {
+              description: `Device: ${row.device_id} | Temp: ${row.temperature?.toFixed(1) ?? "—"}°C | V: ${row.voltage?.toFixed(2) ?? "—"}V`,
+              duration: 8000,
+            },
+          );
 
-          if (parsed.soundAlerts) {
+          if (prefs.soundAlerts && audioCtx.current) {
             try {
-              const ctx = new AudioContext();
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-              osc.frequency.value = 880;
-              osc.type = "sine";
-              gain.gain.value = 0.15;
-              osc.start();
-              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-              osc.stop(ctx.currentTime + 0.5);
-            } catch {}
+              playBeep(audioCtx.current);
+            } catch {
+              // ignore audio failures silently
+            }
           }
-        }
+        },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      // Close AudioContext when user logs out / component unmounts
+      if (audioCtx.current) {
+        audioCtx.current.close().catch(() => {});
+        audioCtx.current = null;
+      }
     };
   }, [user]);
 }

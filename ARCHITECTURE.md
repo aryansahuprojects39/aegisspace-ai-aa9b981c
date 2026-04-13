@@ -1,10 +1,10 @@
 # AegisSpace AI - Architecture & Code Analysis
 
-**Generated:** April 12, 2026  
-**Total Source Files:** 97 TypeScript/TSX files  
+**Generated:** April 12, 2026\
+**Total Source Files:** 97 TypeScript/TSX files\
 **Project Type:** Full-stack React + Supabase application
 
----
+______________________________________________________________________
 
 ## System Architecture Overview
 
@@ -72,7 +72,7 @@
 └────────────────────────────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ## Component Architecture
 
@@ -199,7 +199,7 @@ App.tsx (Root)
     └── ProfileSettings
 ```
 
----
+______________________________________________________________________
 
 ## Data Flow
 
@@ -289,7 +289,7 @@ App.tsx (Root)
    └─ Save: UPDATE profiles table
 ```
 
----
+______________________________________________________________________
 
 ## Database Schema
 
@@ -350,109 +350,109 @@ Supabase Storage: avatars/
 └─ Public: RLS policy allows authenticated access
 ```
 
----
+______________________________________________________________________
 
 ## Key Technologies & Patterns
 
 ### React & State Management
 
-| Pattern | Usage | Where |
-| --- | --- | --- |
-| `useState` | Local component state | Every component |
-| `useEffect` | Side effects, subscriptions | Hooks, pages |
-| `useContext` + `useReducer` | Global auth state | AuthContext.tsx |
-| `React Query` | Server state caching | Potential future use |
-| `React Router v6` | Client-side routing | App.tsx |
-| `React Hook Form + Zod` | Form validation | Login, Signup pages |
+| Pattern                     | Usage                       | Where                |
+| --------------------------- | --------------------------- | -------------------- |
+| `useState`                  | Local component state       | Every component      |
+| `useEffect`                 | Side effects, subscriptions | Hooks, pages         |
+| `useContext` + `useReducer` | Global auth state           | AuthContext.tsx      |
+| `React Query`               | Server state caching        | Potential future use |
+| `React Router v6`           | Client-side routing         | App.tsx              |
+| `React Hook Form + Zod`     | Form validation             | Login, Signup pages  |
 
 ### Styling Approach
 
-| Layer | Technology |
-| --- | --- |
-| Utility CSS | Tailwind CSS (95%+ of styles) |
-| Components | shadcn/ui (pre-built, unstyled) |
-| Animations | Framer Motion (transitions) |
-| Pattern | Glassmorphism (frosted glass cards) |
-| Responsive | Mobile-first, `sm:` breakpoints |
+| Layer       | Technology                          |
+| ----------- | ----------------------------------- |
+| Utility CSS | Tailwind CSS (95%+ of styles)       |
+| Components  | shadcn/ui (pre-built, unstyled)     |
+| Animations  | Framer Motion (transitions)         |
+| Pattern     | Glassmorphism (frosted glass cards) |
+| Responsive  | Mobile-first, `sm:` breakpoints     |
 
 ### 3D Graphics Stack
 
-| Component | Library | Purpose |
-| --- | --- | --- |
-| Scene setup | Three.js | 3D rendering engine |
-| React integration | React Three Fiber | Declarative 3D |
-| Helpers | Drei | Models, animations, lights |
-| Rotation | Quaternion math | Gyro → 3D rotation |
+| Component         | Library           | Purpose                    |
+| ----------------- | ----------------- | -------------------------- |
+| Scene setup       | Three.js          | 3D rendering engine        |
+| React integration | React Three Fiber | Declarative 3D             |
+| Helpers           | Drei              | Models, animations, lights |
+| Rotation          | Quaternion math   | Gyro → 3D rotation         |
 
 ### Data Visualization
 
-| Chart | Library | Real-time |
-| --- | --- | --- |
+| Chart                   | Library  | Real-time                |
+| ----------------------- | -------- | ------------------------ |
 | Line charts (telemetry) | Recharts | Yes (re-renders on data) |
-| Multi-line (gyro) | Recharts | Yes |
-| Dashboard grid | CSS Grid | Yes |
+| Multi-line (gyro)       | Recharts | Yes                      |
+| Dashboard grid          | CSS Grid | Yes                      |
 
 ### Backend & Database
 
-| Layer | Technology | Purpose |
-| --- | --- | --- |
-| Database | PostgreSQL (Supabase) | Persistent storage |
-| Real-time | Supabase Realtime | WebSocket subscriptions |
-| Auth | Supabase Auth + Lovable | OAuth + JWT sessions |
-| Serverless | Deno Edge Functions | AI analysis endpoint |
-| File storage | Supabase Storage | Avatar uploads |
+| Layer        | Technology              | Purpose                 |
+| ------------ | ----------------------- | ----------------------- |
+| Database     | PostgreSQL (Supabase)   | Persistent storage      |
+| Real-time    | Supabase Realtime       | WebSocket subscriptions |
+| Auth         | Supabase Auth + Lovable | OAuth + JWT sessions    |
+| Serverless   | Deno Edge Functions     | AI analysis endpoint    |
+| File storage | Supabase Storage        | Avatar uploads          |
 
----
+______________________________________________________________________
 
 ## Performance Optimizations
 
 ### Frontend Performance
 
 1. **Code Splitting** - Vite automatically chunks by route
-2. **Component Memoization** - `React.memo()` on expensive charts
-3. **Lazy Loading** - Landing page images load on scroll
-4. **Realtime Throttling** - Debounce chart re-renders
-5. **CSS-in-JS Avoidance** - Pure Tailwind reduces runtime overhead
+1. **Component Memoization** - `React.memo()` on expensive charts
+1. **Lazy Loading** - Landing page images load on scroll
+1. **Realtime Throttling** - Debounce chart re-renders
+1. **CSS-in-JS Avoidance** - Pure Tailwind reduces runtime overhead
 
 ### Database Performance
 
 1. **Indexing** - `created_at`, `device_id` indexed for queries
-2. **Pagination** - useTelemetry fetches 50 rows per subscription
-3. **Connection Pooling** - Supabase handles automatically
-4. **RLS Optimization** - Policies evaluated at connection time
+1. **Pagination** - useTelemetry fetches 50 rows per subscription
+1. **Connection Pooling** - Supabase handles automatically
+1. **RLS Optimization** - Policies evaluated at connection time
 
 ### 3D Performance
 
 1. **Geometry Reuse** - Single rocket model instance
-2. **Frustum Culling** - Three.js automatic
-3. **LOD (Level of Detail)** - Could add for large models
-4. **Render Batching** - Drei handles automatically
+1. **Frustum Culling** - Three.js automatic
+1. **LOD (Level of Detail)** - Could add for large models
+1. **Render Batching** - Drei handles automatically
 
----
+______________________________________________________________________
 
 ## Security Implementation
 
 ### Frontend Security
 
-| Layer | Implementation |
-| --- | --- |
-| XSS Prevention | React auto-escapes JSX |
-| CSRF | Supabase handles tokens |
-| Secrets | `.env` excluded from git |
-| Auth | Protected routes + context check |
-| Input Validation | Zod schemas on forms |
+| Layer            | Implementation                   |
+| ---------------- | -------------------------------- |
+| XSS Prevention   | React auto-escapes JSX           |
+| CSRF             | Supabase handles tokens          |
+| Secrets          | `.env` excluded from git         |
+| Auth             | Protected routes + context check |
+| Input Validation | Zod schemas on forms             |
 
 ### Backend Security
 
-| Layer | Implementation |
-| --- | --- |
-| RLS Policies | Enable table-level access control |
-| API Key Scoping | Supabase anon key restricted by RLS |
-| Service Role Secret | Only in Edge Functions |
-| CORS | Supabase auto-configured |
-| Rate Limiting | Supabase built-in |
+| Layer               | Implementation                      |
+| ------------------- | ----------------------------------- |
+| RLS Policies        | Enable table-level access control   |
+| API Key Scoping     | Supabase anon key restricted by RLS |
+| Service Role Secret | Only in Edge Functions              |
+| CORS                | Supabase auto-configured            |
+| Rate Limiting       | Supabase built-in                   |
 
----
+______________________________________________________________________
 
 ## Build & Deployment
 
@@ -481,44 +481,44 @@ npm run lint         # ESLint + TypeScript
 
 ### Deployment Targets
 
-| Target | Method | Ideal For |
-| --- | --- | --- |
-| Vercel | Git push → auto-deploy | Production |
-| Netlify | Git push → auto-deploy | Production |
-| Docker | Containerize → registry | Production |
-| GitHub Pages | Static export | Static only |
+| Target       | Method                  | Ideal For   |
+| ------------ | ----------------------- | ----------- |
+| Vercel       | Git push → auto-deploy  | Production  |
+| Netlify      | Git push → auto-deploy  | Production  |
+| Docker       | Containerize → registry | Production  |
+| GitHub Pages | Static export           | Static only |
 
----
+______________________________________________________________________
 
 ## Key Files Reference
 
-| File | Purpose | Lines |
-| --- | --- | --- |
-| `package.json` | Dependencies & scripts | 96 |
-| `vite.config.ts` | Build configuration | 22 |
-| `tsconfig.json` | TypeScript settings | 15 |
-| `eslint.config.js` | Code quality rules | 26 |
-| `tailwind.config.ts` | Styling config | 60+ |
-| `src/App.tsx` | Root component | ~50 |
-| `src/contexts/AuthContext.tsx` | Global auth | ~80 |
-| `src/hooks/useTelemetry.ts` | Real-time hook | ~150 |
-| `src/charts/TelemetryGraph.tsx` | Main chart | ~200 |
+| File                            | Purpose                | Lines |
+| ------------------------------- | ---------------------- | ----- |
+| `package.json`                  | Dependencies & scripts | 96    |
+| `vite.config.ts`                | Build configuration    | 22    |
+| `tsconfig.json`                 | TypeScript settings    | 15    |
+| `eslint.config.js`              | Code quality rules     | 26    |
+| `tailwind.config.ts`            | Styling config         | 60+   |
+| `src/App.tsx`                   | Root component         | ~50   |
+| `src/contexts/AuthContext.tsx`  | Global auth            | ~80   |
+| `src/hooks/useTelemetry.ts`     | Real-time hook         | ~150  |
+| `src/charts/TelemetryGraph.tsx` | Main chart             | ~200  |
 
----
+______________________________________________________________________
 
 ## Common Development Tasks
 
 ### Adding a New Page
 
 1. Create file: `src/pages/NewPage.tsx`
-2. Export component from `src/pages/index.ts`
-3. Add route in `src/App.tsx`:
+1. Export component from `src/pages/index.ts`
+1. Add route in `src/App.tsx`:
 
 ```tsx
 <Route path="/new-page" element={<NewPage />} />
 ```
 
-4. Add link in `Navbar.tsx`:
+1. Add link in `Navbar.tsx`:
 
 ```tsx
 <NavLink to="/new-page">New Page</NavLink>
@@ -527,9 +527,9 @@ npm run lint         # ESLint + TypeScript
 ### Adding a New Chart
 
 1. Create: `src/components/dashboard/NewChart.tsx`
-2. Extend `TelemetryGraph.tsx` pattern
-3. Use Recharts for charts, Framer Motion for animations
-4. Add to `TelemetryGridSection.tsx`
+1. Extend `TelemetryGraph.tsx` pattern
+1. Use Recharts for charts, Framer Motion for animations
+1. Add to `TelemetryGridSection.tsx`
 
 ### Deploying Edge Function
 
@@ -546,7 +546,7 @@ npm run test         # Single run
 npx playwright test  # E2E only
 ```
 
----
+______________________________________________________________________
 
 ## Next Steps & Roadmap
 
@@ -559,8 +559,60 @@ npx playwright test  # E2E only
 - [ ] Advanced 3D visualization
 - [ ] ML-powered anomaly detection
 
----
+______________________________________________________________________
 
-**Document Version:** 1.0  
-**Last Generated:** April 12, 2026  
+**Document Version:** 1.0\
+**Last Generated:** April 12, 2026\
 **Generator:** Manual code analysis + architecture review
+
+______________________________________________________________________
+
+## ESP32 FLARE Module
+
+### File: `esp32/flare_telemetry.ino`
+
+```text
+esp32/
+├── flare_telemetry.ino     # Main firmware (Arduino IDE)
+├── secrets_template.h      # Credential template (copy → secrets.h)
+└── README.md               # Wiring, library deps, LED codes
+```
+
+### Sensor Stack
+
+| Sensor         | Library                      | Output                   |
+| -------------- | ---------------------------- | ------------------------ |
+| MPU6050        | Adafruit MPU6050             | gyro_x/y/z (°/s)         |
+| INA219         | Adafruit INA219              | voltage (V), current (A) |
+| ESP32 internal | built-in `temperatureRead()` | temperature (°C)         |
+
+### Anomaly Detection (on-device)
+
+Anomalies are flagged on the ESP32 before posting — no round-trip to the server required for detection.
+The `is_anomaly` and `anomaly_reason` fields are set in firmware and stored verbatim in Postgres.
+
+### POST Payload
+
+```json
+{
+  "device_id": "esp32-001",
+  "temperature": 28.45,
+  "voltage": 3.700,
+  "current": 0.4500,
+  "gyro_x": 0.0200,
+  "gyro_y": -0.0100,
+  "gyro_z": 0.0000,
+  "is_anomaly": false
+}
+```
+
+______________________________________________________________________
+
+## Migration History
+
+| File                   | Description                                           |
+| ---------------------- | ----------------------------------------------------- |
+| `20260408200342_*.sql` | `profiles` table + auth trigger                       |
+| `20260408201036_*.sql` | `telemetry_data` table + realtime + device index      |
+| `20260411183219_*.sql` | `avatars` storage bucket + RLS policies               |
+| `20260412000000_*.sql` | Anomaly index + time index + RLS device-id validation |
