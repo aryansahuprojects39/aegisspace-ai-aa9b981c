@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase, lovable } from "@/integrations";
+import { supabase } from "@/integrations";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -43,16 +43,19 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     if (!validateTerms()) return;
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
     });
-    if (result.error) {
-      toast.error(result.error.message || "Google sign-in failed");
+
+    if (error) {
+      toast.error(error.message || "Google sign-in failed");
+      toast.error("If this persists, enable Google provider and add this redirect URL in Supabase Auth settings.");
       setGoogleLoading(false);
       return;
     }
-    if (result.redirected) return;
-    navigate("/dashboard");
   };
 
   return (

@@ -1,12 +1,11 @@
 /**
  * AegisSpace FLARE Module — ESP32 Telemetry Firmware
  * ====================================================
- * Reads sensors and POSTs JSON to Supabase telemetry_readings table.
+ * Reads sensors and POSTs JSON to n8n webhook.
  *
- * Real DB schema columns (telemetry_readings):
- *   device_id, temperature1, temperature2, voltage, current,
- *   vibration, rf_signal, motion_detected, rf_interference,
- *   status, anomaly_score, sabotage_probability
+ * n8n expected payload (written to Supabase telemetry_data):
+ *   device_id, temperature, voltage, current,
+ *   gyro_x, gyro_y, gyro_z, is_anomaly, anomaly_reason
  *
  * Hardware:
  *   - ESP32 DevKit v1
@@ -35,7 +34,7 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_INA219.h>
 #include <Adafruit_Sensor.h>
-#include "secrets.h"   // WIFI_SSID, WIFI_PASSWORD, DEVICE_ID, SUPABASE_URL, SUPABASE_ANON_KEY
+#include "secrets.h"   // WIFI_SSID, WIFI_PASSWORD, DEVICE_ID, N8N_WEBHOOK_URL
 
 // ---------------------------------------------------------------------------
 // Hardware pins
@@ -91,18 +90,23 @@ bool wifiConnect() {
 }
 
 // ---------------------------------------------------------------------------
-// Sensor reading — matches real telemetry_readings schema
+// Sensor reading and normalization for n8n telemetry payload
 // ---------------------------------------------------------------------------
 struct Reading {
   float  temperature1;       // °C  primary (INA219 die / ESP32 internal)
   float  temperature2;       // °C  secondary (MPU die)
   float  voltage;            // V
   float  current;            // A
+  float  gyro_x;             // deg/s (MPU6050)
+  float  gyro_y;             // deg/s (MPU6050)
+  float  gyro_z;             // deg/s (MPU6050)
   float  vibration;          // m/s² accel magnitude (gravity-subtracted)
   float  rf_signal;          // dBm (WiFi RSSI)
   bool   motion_detected;
   bool   rf_interference;
   String status;             // "normal" | "warning" | "critical"
+  bool   is_anomaly;
+  String anomaly_reason;
   float  anomaly_score;      // 0.0–1.0
   float  sabotage_probability; // 0.0–1.0
 };
@@ -113,11 +117,16 @@ Reading readSensors() {
   r.temperature2        = r.temperature1;
   r.voltage             = 3.7f;
   r.current             = 0.0f;
+  r.gyro_x              = 0.0f;
+  r.gyro_y              = 0.0f;
+  r.gyro_z              = 0.0f;
   r.vibration           = 0.0f;
   r.rf_signal           = (float)WiFi.RSSI();
   r.motion_detected     = false;
   r.rf_interference     = false;
   r.status              = "normal";
+  r.is_anomaly          = false;
+  r.anomaly_reason      = "";
   r.anomaly_score       = 0.0f;
   r.sabotage_probability = 0.0f;
 
@@ -137,6 +146,10 @@ Reading readSensors() {
     float mag = sqrt(ax*ax + ay*ay + az*az);
     r.vibration    = fabsf(mag - 9.81f);
     r.temperature2 = temp.temperature;
+    // Adafruit reports rad/s; convert to deg/s for n8n anomaly thresholds.
+    r.gyro_x       = gyro.gyro.x * 57.2958f;
+    r.gyro_y       = gyro.gyro.y * 57.2958f;
+    r.gyro_z       = gyro.gyro.z * 57.2958f;
   }
 
   // PIR motion
@@ -196,50 +209,65 @@ Reading readSensors() {
   else if (r.anomaly_score >= 0.2f) r.status = "warning";
   else                              r.status = "normal";
 
-  (void)reasons; // logged to Serial below
+  r.is_anomaly = (r.anomaly_score >= 0.2f);
+  r.anomaly_reason = reasons;
+
   return r;
 }
 
 // ---------------------------------------------------------------------------
-// HTTP POST — directly to Supabase REST API
+// HTTP POST — to n8n webhook
 // ---------------------------------------------------------------------------
-bool postReading(const Reading& r) {
+bool postReading(const Reading& r, unsigned long heartbeatSeq) {
   WiFiClientSecure client;
-  client.setInsecure(); // swap for CA cert in production
+  client.setInsecure(); // swap for CA cert pinning in production
   HTTPClient http;
 
-  String url = String(SUPABASE_URL) + "/rest/v1/telemetry_readings";
+  String url = String(N8N_WEBHOOK_URL);
   http.begin(client, url);
   http.addHeader("Content-Type",  "application/json");
-  http.addHeader("apikey",        SUPABASE_ANON_KEY);
-  http.addHeader("Authorization", String("Bearer ") + SUPABASE_ANON_KEY);
-  http.addHeader("Prefer",        "return=minimal");
 
   JsonDocument doc;
   doc["device_id"]              = DEVICE_ID;
-  doc["temperature1"]           = serialized(String(r.temperature1, 2));
-  doc["temperature2"]           = serialized(String(r.temperature2, 2));
+  doc["temperature"]            = serialized(String(r.temperature1, 2));
   doc["voltage"]                = serialized(String(r.voltage, 3));
   doc["current"]                = serialized(String(r.current, 4));
-  doc["vibration"]              = serialized(String(r.vibration, 4));
-  doc["rf_signal"]              = serialized(String(r.rf_signal, 1));
-  doc["motion_detected"]        = r.motion_detected;
-  doc["rf_interference"]        = r.rf_interference;
-  doc["status"]                 = r.status;
-  doc["anomaly_score"]          = serialized(String(r.anomaly_score, 3));
-  doc["sabotage_probability"]   = serialized(String(r.sabotage_probability, 3));
+  doc["gyro_x"]                 = serialized(String(r.gyro_x, 4));
+  doc["gyro_y"]                 = serialized(String(r.gyro_y, 4));
+  doc["gyro_z"]                 = serialized(String(r.gyro_z, 4));
+  doc["is_anomaly"]             = r.is_anomaly;
+  doc["anomaly_reason"]         = r.is_anomaly ? r.anomaly_reason : nullptr;
+  doc["heartbeat_seq"]          = heartbeatSeq;
+  doc["uptime_ms"]              = millis();
 
   String payload;
   serializeJson(doc, payload);
 
+  Serial.printf("[HTTP] POST %s\n", url.c_str());
+  Serial.printf("[HTTP] Payload: %s\n", payload.c_str());
+
   int code = http.POST(payload);
+
+  String responseBody = "";
+  if (code > 0) {
+    responseBody = http.getString();
+  }
   http.end();
 
   if (code == 201 || code == 200) {
     Serial.printf("[HTTP] POST OK (%d)\n", code);
+    if (responseBody.length() > 0) {
+      Serial.printf("[HTTP] Response: %s\n", responseBody.c_str());
+    }
     return true;
   }
   Serial.printf("[HTTP] POST failed: %d\n", code);
+  if (code < 0) {
+    Serial.printf("[HTTP] Error: %s\n", http.errorToString(code).c_str());
+  }
+  if (responseBody.length() > 0) {
+    Serial.printf("[HTTP] Response: %s\n", responseBody.c_str());
+  }
   return false;
 }
 
@@ -251,6 +279,8 @@ void setup() {
   delay(500);
   Serial.println("\n=== AegisSpace FLARE Module ===");
   Serial.printf("Device ID: %s\n", DEVICE_ID);
+  Serial.printf("Webhook URL: %s\n", N8N_WEBHOOK_URL);
+  Serial.printf("Post interval: %lums\n", POST_INTERVAL_MS);
 
   pinMode(LED_PIN, OUTPUT);
   pinMode(PIR_PIN, INPUT);
@@ -277,6 +307,8 @@ void setup() {
 
   if (!wifiConnect()) {
     Serial.println("[WiFi] Boot connect failed — will retry in loop");
+  } else {
+    Serial.printf("[WiFi] RSSI: %d dBm\n", WiFi.RSSI());
   }
 
   Serial.println("[FLARE] Ready.\n");
@@ -284,8 +316,10 @@ void setup() {
 
 void loop() {
   static unsigned long lastPost = 0;
+  static unsigned long heartbeatSeq = 0;
   if (millis() - lastPost < POST_INTERVAL_MS) { delay(100); return; }
   lastPost = millis();
+  heartbeatSeq++;
 
   if (!wifiConnect()) {
     Serial.println("[WiFi] Offline — skipping");
@@ -296,13 +330,13 @@ void loop() {
   Reading r = readSensors();
 
   Serial.printf(
-    "[DATA] T1=%.2f T2=%.2f V=%.3f I=%.4f Vib=%.3f RF=%.1fdBm "
-    "motion=%d rfint=%d status=%s score=%.2f sab=%.2f\n",
-    r.temperature1, r.temperature2, r.voltage, r.current,
-    r.vibration, r.rf_signal, r.motion_detected, r.rf_interference,
-    r.status.c_str(), r.anomaly_score, r.sabotage_probability
+    "[DATA] seq=%lu T=%.2f V=%.3f I=%.4f Gx=%.3f Gy=%.3f Gz=%.3f "
+    "status=%s anomaly=%d score=%.2f\n",
+    heartbeatSeq, r.temperature1, r.voltage, r.current,
+    r.gyro_x, r.gyro_y, r.gyro_z,
+    r.status.c_str(), r.is_anomaly, r.anomaly_score
   );
 
-  bool ok = postReading(r);
+  bool ok = postReading(r, heartbeatSeq);
   ledBlink(ok ? 1 : 3, ok ? 50 : 100);
 }

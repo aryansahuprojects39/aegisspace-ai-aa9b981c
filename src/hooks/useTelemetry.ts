@@ -3,6 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 type TelemetryRow = Tables<"telemetry_data">;
+const ACTIVE_WINDOW_MS = 60 * 1000;
+
+const isFresh = (row: Pick<TelemetryRow, "created_at">) => {
+  const ts = new Date(row.created_at).getTime();
+  if (Number.isNaN(ts)) return false;
+  return Date.now() - ts <= ACTIVE_WINDOW_MS;
+};
 
 /**
  * useTelemetry
@@ -24,10 +31,12 @@ export function useTelemetry(limit = 50) {
     cancelRef.current = false;
     setLoading(true);
     setError(null);
+    const sinceIso = new Date(Date.now() - ACTIVE_WINDOW_MS).toISOString();
 
     const { data: rows, error: fetchError } = await supabase
       .from("telemetry_data")
       .select("*")
+      .gte("created_at", sinceIso)
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -42,7 +51,7 @@ export function useTelemetry(limit = 50) {
       console.error("useTelemetry fetch error:", fetchError.message);
       setError(fetchError.message);
     } else if (rows) {
-      setData(rows.reverse()); // oldest-first for chart rendering
+      setData(rows.filter(isFresh).reverse()); // oldest-first for chart rendering
     }
     setLoading(false);
   };
@@ -56,8 +65,11 @@ export function useTelemetry(limit = 50) {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "telemetry_data" },
         (payload) => {
+          const incoming = payload.new as TelemetryRow;
+          if (!isFresh(incoming)) return;
+
           setData((prev) => {
-            const next = [...prev, payload.new as TelemetryRow];
+            const next = [...prev.filter(isFresh), incoming];
             // Keep only the most recent `limit` rows
             return next.length > limit ? next.slice(next.length - limit) : next;
           });
@@ -65,8 +77,13 @@ export function useTelemetry(limit = 50) {
       )
       .subscribe();
 
+    const pruneTimer = setInterval(() => {
+      setData((prev) => prev.filter(isFresh));
+    }, 5000);
+
     return () => {
       cancelRef.current = true; // cancel any in-flight fetch
+      clearInterval(pruneTimer);
       supabase.removeChannel(channel);
     };
   }, [limit]); // eslint-disable-line react-hooks/exhaustive-deps

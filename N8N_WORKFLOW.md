@@ -65,6 +65,7 @@ https://{your-n8n-instance}/webhook/aegis-telemetry
 ```
 
 **Example (Supabase-hosted n8n):**
+
 ```
 https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry
 ```
@@ -85,6 +86,7 @@ https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry
 | Response Mode | Response Node |
 
 **Input Format:**
+
 ```json
 {
   "device_id": "esp32-001",
@@ -120,6 +122,8 @@ const current     = parseFloat(body.current     ?? 0);
 const gyro_x      = parseFloat(body.gyro_x      ?? 0);
 const gyro_y      = parseFloat(body.gyro_y      ?? 0);
 const gyro_z      = parseFloat(body.gyro_z      ?? 0);
+const heartbeat_seq = Number(body.heartbeat_seq ?? 0);
+const uptime_ms     = Number(body.uptime_ms ?? 0);
 
 // device_id format guard
 if (!/^esp32-[a-zA-Z0-9\-]+$/.test(device_id)) {
@@ -156,6 +160,8 @@ return [{
     gyro_x,
     gyro_y,
     gyro_z,
+    heartbeat_seq,
+    uptime_ms,
     is_anomaly,
     anomaly_reason,
     _raw_body: body
@@ -175,6 +181,7 @@ return [{
 | Gyro Magnitude | √(x² + y² + z²) > 250°/s | Add to `anomaly_reason` |
 
 **Output:**
+
 ```json
 {
   "device_id": "esp32-001",
@@ -184,6 +191,8 @@ return [{
   "gyro_x": 15.5,
   "gyro_y": -8.2,
   "gyro_z": 22.1,
+  "heartbeat_seq": 42,
+  "uptime_ms": 210000,
   "is_anomaly": false,
   "anomaly_reason": null,
   "_raw_body": { ... }
@@ -214,6 +223,7 @@ return [{
 | `Prefer` | `return=minimal` |
 
 **Request Body:**
+
 ```json
 {
   "device_id": "esp32-001",
@@ -223,12 +233,15 @@ return [{
   "gyro_x": 15.5,
   "gyro_y": -8.2,
   "gyro_z": 22.1,
+  "heartbeat_seq": 42,
+  "uptime_ms": 210000,
   "is_anomaly": false,
   "anomaly_reason": null
 }
 ```
 
 **Database Table:**
+
 ```sql
 CREATE TABLE public.telemetry_data (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -257,6 +270,7 @@ CREATE INDEX idx_telemetry_device_id ON telemetry_data(device_id);
 **Type:** IF Node
 
 **Condition:**
+
 ```
 if ( is_anomaly === true )
   → Branch: TRUE (Log Anomaly)
@@ -264,12 +278,14 @@ if ( is_anomaly === true )
 ```
 
 **TRUE Branch Actions:**
+
 - Log anomaly details to console
 - (Optional) Send Slack notification
 - (Optional) Send email alert
 - Return HTTP 201 Created
 
 **FALSE Branch Actions:**
+
 - Skip alert
 - Return HTTP 201 Created
 
@@ -282,6 +298,7 @@ if ( is_anomaly === true )
 **Scenario:** Invalid device_id format
 
 **Response:**
+
 ```json
 {
   "statusCode": 400,
@@ -292,6 +309,7 @@ if ( is_anomaly === true )
 **Scenario:** Non-numeric sensor values
 
 **Response:**
+
 ```json
 {
   "statusCode": 400,
@@ -304,6 +322,7 @@ if ( is_anomaly === true )
 **Scenario:** Authentication failure (invalid API key)
 
 **Response:**
+
 ```json
 {
   "statusCode": 401,
@@ -314,6 +333,7 @@ if ( is_anomaly === true )
 **Scenario:** Table not found
 
 **Response:**
+
 ```json
 {
   "statusCode": 404,
@@ -343,6 +363,7 @@ curl -X POST https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "statusCode": 201,
@@ -368,6 +389,7 @@ curl -X POST https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "statusCode": 201,
@@ -376,6 +398,7 @@ curl -X POST https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry \
 ```
 
 In n8n logs, you should see:
+
 ```
 CRITICAL temperature (95.0C)
 Low voltage (2.8V)
@@ -399,11 +422,13 @@ Add to `esp32/secrets.h`:
 ### Supabase Configuration
 
 Ensure:
+
 - Table `telemetry_data` exists
 - RLS policies allow anonymous INSERT/SELECT
 - Anon key has `telemetry_data` permissions
 
 **RLS Policy:**
+
 ```sql
 -- Allow anyone to INSERT
 CREATE POLICY "Allow anonymous insert"
@@ -552,6 +577,7 @@ docker logs n8n-container
 ## Contact
 
 For issues or questions:
-- **n8n Docs:** https://docs.n8n.io
-- **Supabase Docs:** https://supabase.com/docs
+
+- **n8n Docs:** <https://docs.n8n.io>
+- **Supabase Docs:** <https://supabase.com/docs>
 - **AegisSpace:** [project-repo]

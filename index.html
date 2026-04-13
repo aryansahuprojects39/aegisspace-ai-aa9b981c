@@ -11,6 +11,26 @@
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="https://aegisspace.ai" />
+    <script>
+      (function () {
+        if (!location.hostname.includes("localhost")) return;
+
+        const originalInfo = console.info.bind(console);
+        const originalDebug = console.debug.bind(console);
+
+        console.info = function (...args) {
+          const first = String(args[0] ?? "");
+          if (first.includes("Download the React DevTools")) return;
+          originalInfo(...args);
+        };
+
+        console.debug = function (...args) {
+          const first = String(args[0] ?? "");
+          if (first.includes("[vite] connecting") || first.includes("[vite] connected")) return;
+          originalDebug(...args);
+        };
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

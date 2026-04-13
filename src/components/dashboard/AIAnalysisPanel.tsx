@@ -17,6 +17,62 @@ interface AIAnalysisPanelProps {
   telemetry: TelemetryRow[];
 }
 
+const REMOTE_AI_ENABLED = import.meta.env.VITE_ENABLE_REMOTE_AI_ANALYSIS === "true";
+
+const buildLocalAnalysis = (rows: TelemetryRow[]): AIAnalysis => {
+  const latest = rows[rows.length - 1];
+  if (!latest) {
+    return {
+      status: "nominal",
+      summary: "No telemetry available.",
+      details: "Awaiting live readings from the FLARE module.",
+      risks: [],
+      recommendation: "Keep monitoring dashboard stream.",
+    };
+  }
+
+  const risks: string[] = [];
+  const temp = latest.temperature ?? 0;
+  const voltage = latest.voltage ?? 0;
+  const current = latest.current ?? 0;
+  const gyroMag = Math.sqrt((latest.gyro_x ?? 0) ** 2 + (latest.gyro_y ?? 0) ** 2 + (latest.gyro_z ?? 0) ** 2);
+
+  if (temp >= 85) risks.push(`Critical temperature (${temp.toFixed(1)} C)`);
+  else if (temp >= 70) risks.push(`High temperature (${temp.toFixed(1)} C)`);
+
+  if (voltage < 3.0) risks.push(`Low voltage (${voltage.toFixed(2)} V)`);
+  else if (voltage > 5.5) risks.push(`Overvoltage (${voltage.toFixed(2)} V)`);
+
+  if (current > 2.0) risks.push(`Overcurrent (${current.toFixed(3)} A)`);
+  if (gyroMag > 250) risks.push(`High angular rate (${gyroMag.toFixed(1)} deg/s)`);
+  if (latest.is_anomaly) risks.push(latest.anomaly_reason ?? "Device flagged anomaly");
+
+  const status: AIAnalysis["status"] =
+    risks.some((r) => r.toLowerCase().includes("critical")) || latest.is_anomaly
+      ? "critical"
+      : risks.length > 0
+        ? "warning"
+        : "nominal";
+
+  return {
+    status,
+    summary:
+      status === "critical"
+        ? "Immediate attention required for current telemetry state."
+        : status === "warning"
+          ? "Telemetry drift detected; review subsystem thresholds."
+          : "All monitored parameters are within expected operating range.",
+    details: `Latest sample from ${latest.device_id} at ${new Date(latest.created_at).toLocaleString()}.`,
+    risks,
+    recommendation:
+      status === "critical"
+        ? "Pause mission-critical operations and inspect hardware sensors immediately."
+        : status === "warning"
+          ? "Continue monitoring and schedule a subsystem check if trend persists."
+          : "No action required beyond standard monitoring cadence.",
+  };
+};
+
 const AIAnalysisPanel = ({ telemetry }: AIAnalysisPanelProps) => {
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,6 +84,11 @@ const AIAnalysisPanel = ({ telemetry }: AIAnalysisPanelProps) => {
     setError(null);
 
     try {
+      if (!REMOTE_AI_ENABLED) {
+        setAnalysis(buildLocalAnalysis(telemetry.slice(-10)));
+        return;
+      }
+
       const { data, error: fnError } = await supabase.functions.invoke("analyze-telemetry", {
         body: { telemetryData: telemetry.slice(-10) },
       });
