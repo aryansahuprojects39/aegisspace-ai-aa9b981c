@@ -59,7 +59,8 @@ export function useAnomalyNotifications() {
   useEffect(() => {
     if (!user) return;
 
-    const prefs = loadPrefs(user.id);
+    const userId = user.id;
+    const prefs = loadPrefs(userId);
     if (!prefs.anomalyAlerts) return;
 
     // Create one AudioContext for the lifetime of this subscription
@@ -77,6 +78,10 @@ export function useAnomalyNotifications() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "telemetry_data" },
         (payload) => {
+          // Re-read prefs on every event so mid-session changes take effect
+          const currentPrefs = loadPrefs(userId);
+          if (!currentPrefs.anomalyAlerts) return;
+
           const row = payload.new as TelemetryRow;
           if (!row.is_anomaly)          return;
           if (seenIds.current.has(row.id)) return;
@@ -90,7 +95,7 @@ export function useAnomalyNotifications() {
             },
           );
 
-          if (prefs.soundAlerts && audioCtx.current) {
+          if (currentPrefs.soundAlerts && audioCtx.current) {
             try {
               playBeep(audioCtx.current);
             } catch {

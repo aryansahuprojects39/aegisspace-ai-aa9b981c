@@ -89,7 +89,17 @@ function linearExtrapolate(data: TelemetryRow[], key: NumericTelemetryKey, projC
   const results = [];
   for (let i = 1; i <= projCount; i++) {
     results.push({
+      id: `proj_${i}`,
+      device_id: "",
       created_at: `proj_${i}`,
+      temperature: null,
+      voltage: null,
+      current: null,
+      gyro_x: null,
+      gyro_y: null,
+      gyro_z: null,
+      is_anomaly: false,
+      anomaly_reason: null,
       [key]: intercept + slope * (lastX + i),
       _projected: true,
     });
