@@ -7,8 +7,26 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type TelemetryRow = Tables<"telemetry_data">;
 
-const COLORS = { gyro_x: "#6EF3FF", gyro_y: "#FF6BD6", gyro_z: "#A66CFF" };
-const LABELS = { gyro_x: "X", gyro_y: "Y", gyro_z: "Z" };
+type GyroKey = "gyro_x" | "gyro_y" | "gyro_z";
+type GyroDatum = Pick<TelemetryRow, "created_at" | "is_anomaly" | GyroKey> & {
+  _projected?: boolean;
+};
+
+interface TooltipPayloadItem {
+  payload: GyroDatum;
+  dataKey: string;
+  color: string;
+  name: string;
+  value: number | null;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+}
+
+const COLORS: Record<GyroKey, string> = { gyro_x: "#6EF3FF", gyro_y: "#FF6BD6", gyro_z: "#A66CFF" };
+const LABELS: Record<GyroKey, string> = { gyro_x: "X", gyro_y: "Y", gyro_z: "Z" };
 
 const TIME_RANGES = [
   { label: "10s", points: 10 },
@@ -16,9 +34,12 @@ const TIME_RANGES = [
   { label: "All", points: 50 },
 ] as const;
 
-function linearExtrapolate(data: any[], key: string, projCount: number) {
+function linearExtrapolate(data: GyroDatum[], key: GyroKey, projCount: number): Array<Pick<GyroDatum, GyroKey>> {
   if (data.length < 5) return [];
-  const last5 = data.slice(-5).map((d: any, i: number) => ({ x: i, y: d[key] as number })).filter(p => p.y != null);
+  const last5 = data
+    .slice(-5)
+    .map((d, i) => ({ x: i, y: d[key] }))
+    .filter((p): p is { x: number; y: number } => p.y != null);
   if (last5.length < 2) return [];
   const n = last5.length;
   const sumX = last5.reduce((a, p) => a + p.x, 0);
@@ -28,23 +49,23 @@ function linearExtrapolate(data: any[], key: string, projCount: number) {
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
   const intercept = (sumY - slope * sumX) / n;
   const lastX = last5[last5.length - 1].x;
-  const results: Record<string, any>[] = [];
+  const results: Array<Pick<GyroDatum, GyroKey>> = [];
   for (let i = 1; i <= projCount; i++) {
     results.push({ [key]: intercept + slope * (lastX + i) });
   }
   return results;
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (d?._projected) return null;
   return (
     <div className="rounded-xl border border-border/30 bg-card/90 backdrop-blur-md px-3 py-2 text-xs shadow-lg">
       {d?.created_at && <p className="text-muted-foreground mb-1">{new Date(d.created_at).toLocaleTimeString()}</p>}
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <p key={p.dataKey} style={{ color: p.color }} className="font-mono">
-          {p.name}: {p.value?.toFixed(2)}°/s
+          {p.name}: {typeof p.value === "number" ? p.value.toFixed(2) : "N/A"}°/s
         </p>
       ))}
       {d?.is_anomaly && <p className="text-destructive font-semibold mt-1">⚠ Anomaly Detected</p>}

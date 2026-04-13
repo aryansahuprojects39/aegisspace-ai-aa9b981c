@@ -35,8 +35,8 @@ const AIAnalysisPanel = ({ telemetry }: AIAnalysisPanelProps) => {
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
       setAnalysis(data as AIAnalysis);
-    } catch (e: any) {
-      setError(e.message || "Analysis failed");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Analysis failed");
     } finally {
       setLoading(false);
     }

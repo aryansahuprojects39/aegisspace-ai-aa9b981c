@@ -9,6 +9,27 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type TelemetryRow = Tables<"telemetry_data">;
+type NumericTelemetryKey = "temperature" | "voltage" | "current" | "gyro_x" | "gyro_y" | "gyro_z";
+
+interface TooltipPayloadItem {
+  payload: TelemetryRow & { _projected?: boolean };
+  value: number | null;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  unit: string;
+  normalRange?: string;
+  thresholds?: ThresholdZone;
+  title: string;
+}
+
+interface AnomalyDotProps {
+  cx?: number;
+  cy?: number;
+  payload?: TelemetryRow;
+}
 
 interface ThresholdZone {
   low: number;
@@ -22,7 +43,7 @@ interface ThresholdZone {
 interface Props {
   title: string;
   icon: React.ElementType;
-  dataKey: string;
+  dataKey: NumericTelemetryKey;
   color: string;
   unit: string;
   normalRange?: string;
@@ -50,9 +71,12 @@ function getInsight(status: "Normal" | "Warning" | "Critical", title: string): s
   return `Critical — check ${title.toLowerCase()} sensor`;
 }
 
-function linearExtrapolate(data: any[], key: string, projCount: number) {
+function linearExtrapolate(data: TelemetryRow[], key: NumericTelemetryKey, projCount: number): Array<TelemetryRow & { _projected: true }> {
   if (data.length < 5) return [];
-  const last5 = data.slice(-5).map((d: any, i: number) => ({ x: i, y: d[key] as number })).filter(p => p.y != null);
+  const last5 = data
+    .slice(-5)
+    .map((d, i) => ({ x: i, y: d[key] }))
+    .filter((p): p is { x: number; y: number } => p.y != null);
   if (last5.length < 2) return [];
   const n = last5.length;
   const sumX = last5.reduce((a, p) => a + p.x, 0);
@@ -73,7 +97,7 @@ function linearExtrapolate(data: any[], key: string, projCount: number) {
   return results;
 }
 
-const CustomTooltip = ({ active, payload, unit, normalRange, thresholds, title }: any) => {
+const CustomTooltip = ({ active, payload, unit, normalRange, thresholds, title }: CustomTooltipProps) => {
   if (!active || !payload?.[0]) return null;
   const d = payload[0].payload;
   if (d._projected) return null;
@@ -82,7 +106,7 @@ const CustomTooltip = ({ active, payload, unit, normalRange, thresholds, title }
   const statusColors = { Normal: "text-primary", Warning: "text-yellow-400", Critical: "text-destructive" };
   return (
     <div className="rounded-xl border border-border/30 bg-card/90 backdrop-blur-md px-3 py-2 text-xs shadow-lg min-w-[160px]">
-      <p className="text-foreground font-semibold">{val?.toFixed(2)} {unit}</p>
+      <p className="text-foreground font-semibold">{typeof val === "number" ? val.toFixed(2) : "N/A"} {unit}</p>
       <p className="text-muted-foreground">{new Date(d.created_at).toLocaleTimeString()}</p>
       <p className={`font-medium ${statusColors[status]}`}>{status}</p>
       <p className="text-muted-foreground/70 text-[10px] mt-0.5 italic">{getInsight(status, title)}</p>
@@ -92,9 +116,9 @@ const CustomTooltip = ({ active, payload, unit, normalRange, thresholds, title }
   );
 };
 
-const AnomalyDot = (props: any) => {
-  const { cx, cy, payload } = props;
+const AnomalyDot = ({ cx, cy, payload }: AnomalyDotProps) => {
   if (!payload?.is_anomaly) return null;
+  if (typeof cx !== "number" || typeof cy !== "number") return null;
   return (
     <g>
       <circle cx={cx} cy={cy} r={6} fill="none" stroke="hsl(0, 80%, 55%)" strokeWidth={1.5} opacity={0.4}>
@@ -110,8 +134,8 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
   const [range, setRange] = useState<number>(50);
 
   const visibleData = useMemo(() => data.slice(-range), [data, range]);
-  const latestValue = visibleData.length > 0 ? (visibleData[visibleData.length - 1] as any)?.[dataKey] : null;
-  const prevValue = visibleData.length > 1 ? (visibleData[visibleData.length - 2] as any)?.[dataKey] : null;
+  const latestValue = visibleData.length > 0 ? visibleData[visibleData.length - 1][dataKey] : null;
+  const prevValue = visibleData.length > 1 ? visibleData[visibleData.length - 2][dataKey] : null;
   const hasAnomaly = visibleData.length > 0 && visibleData[visibleData.length - 1]?.is_anomaly;
   const fillGradientId = `fill-${dataKey}`;
   const strokeGradientId = `stroke-${dataKey}`;
