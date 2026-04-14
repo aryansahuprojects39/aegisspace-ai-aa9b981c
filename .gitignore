@@ -20,6 +20,7 @@ graphify-out/
 .env
 .env.local
 .env.*.local
+.env.example
 
 # Editor directories and files
 .vscode/*
@@ -33,4 +34,5 @@ graphify-out/
 *.sw?
 
 # ESP32 device credentials — never commit
-esp32/secrets.h
+ESP32/secrets.h
+ESP32/secrets_template.h
