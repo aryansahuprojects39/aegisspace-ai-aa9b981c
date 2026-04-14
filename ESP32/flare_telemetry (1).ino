@@ -36,6 +36,9 @@
 #include <Adafruit_Sensor.h>
 #include "secrets.h"   // WIFI_SSID, WIFI_PASSWORD, DEVICE_ID, N8N_WEBHOOK_URL
 
+// Temporary test endpoint override for current n8n workflow debugging.
+#define ACTIVE_N8N_WEBHOOK_URL "https://aryan3929.app.n8n.cloud/webhook-test/aegis-telemetry"
+
 // ---------------------------------------------------------------------------
 // Hardware pins
 // ---------------------------------------------------------------------------
@@ -223,7 +226,7 @@ bool postReading(const Reading& r, unsigned long heartbeatSeq) {
   client.setInsecure(); // swap for CA cert pinning in production
   HTTPClient http;
 
-  String url = String(N8N_WEBHOOK_URL);
+  String url = String(ACTIVE_N8N_WEBHOOK_URL);
   http.begin(client, url);
   http.addHeader("Content-Type",  "application/json");
 
@@ -279,7 +282,7 @@ void setup() {
   delay(500);
   Serial.println("\n=== AegisSpace FLARE Module ===");
   Serial.printf("Device ID: %s\n", DEVICE_ID);
-  Serial.printf("Webhook URL: %s\n", N8N_WEBHOOK_URL);
+  Serial.printf("Webhook URL: %s\n", ACTIVE_N8N_WEBHOOK_URL);
   Serial.printf("Post interval: %lums\n", POST_INTERVAL_MS);
 
   pinMode(LED_PIN, OUTPUT);
