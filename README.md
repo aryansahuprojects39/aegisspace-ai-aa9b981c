@@ -16,9 +16,8 @@ module streams sensor data through an **n8n** webhook pipeline into
 Supabase, where it is stored, analyzed by an AI engine, and visualized
 on a live dashboard — all within milliseconds.
 
-The platform detects anomalies automatically, displays a 3D digital twin
-of the launch vehicle, and provides AI-generated mission assessments on
-demand.
+
+The platform detects anomalies automatically and provides AI-generated mission assessments on demand.
 
 ______________________________________________________________________
 
@@ -30,8 +29,7 @@ ______________________________________________________________________
   with toast notifications and audio alerts
 - **AI Mission Analysis** — On-demand analysis powered by Gemini via
   Supabase Edge Functions
-- **3D Digital Twin** — Interactive Three.js rocket model that mirrors
-  live gyroscope orientation
+
 - **Predictive Trend Lines** — Linear extrapolation overlay on telemetry
   graphs
 - **CSV Export** — One-click download of the full telemetry session
@@ -50,7 +48,7 @@ ______________________________________________________________________
 | ------------- | ------------------------------------------------------------ |
 | Frontend      | React 18, TypeScript, Vite                                   |
 | Styling       | Tailwind CSS, shadcn/ui, Framer Motion                       |
-| 3D Graphics   | Three.js, React Three Fiber, Drei                            |
+
 | Backend       | Supabase (Postgres, Auth, Realtime, Storage, Edge Functions) |
 | AI Engine     | Google Gemini (via Lovable AI Gateway)                       |
 | Data Pipeline | n8n webhooks → ESP32 FLARE module                            |

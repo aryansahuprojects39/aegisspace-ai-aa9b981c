@@ -61,7 +61,7 @@ const DashboardPreview = () => {
               </div>
             ))}
 
-            {/* Center: dashboard placeholder (digital twin removed) */}
+            {/* Center: dashboard placeholder */}
             <div className="glass rounded-xl p-4 col-span-3 lg:col-span-2 lg:row-span-2 flex flex-col items-center justify-center min-h-[180px]">
               <div className="w-20 h-20 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center mb-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 animate-pulse" />

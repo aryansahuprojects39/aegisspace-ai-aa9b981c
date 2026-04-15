@@ -121,7 +121,7 @@ const Dashboard = () => {
         </motion.div>
 
 
-        {/* AI Panel Only (Digital Twin removed) */}
+        {/* AI Panel Only */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <AIAnalysisPanel telemetry={telemetry} />
@@ -155,7 +155,11 @@ const Dashboard = () => {
 
           {/* Device Connectivity */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-            <DeviceConnectivity isConnected={telemetry.length > 0} dataPoints={telemetry.length} />
+            <DeviceConnectivity
+              isConnected={telemetry.length > 0}
+              dataPoints={telemetry.length}
+              latestDeviceId={latest?.device_id}
+            />
           </motion.div>
 
           {/* Mini Radar */}

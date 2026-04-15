@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 interface DeviceConnectivityProps {
   isConnected: boolean;
   dataPoints: number;
+  latestDeviceId?: string;  // ← NEW
 }
 
-const DeviceConnectivity = ({ isConnected, dataPoints }: DeviceConnectivityProps) => {
+const DeviceConnectivity = ({ isConnected, dataPoints, latestDeviceId }: DeviceConnectivityProps) => {
   const [showWifiPanel, setShowWifiPanel] = useState(false);
   const [ssid, setSsid] = useState("");
   const [password, setPassword] = useState("");
@@ -67,7 +68,7 @@ const DeviceConnectivity = ({ isConnected, dataPoints }: DeviceConnectivityProps
 
         {/* Device Info */}
         <div className="text-[10px] text-muted-foreground space-y-1 border-t border-border pt-2">
-          <div className="flex justify-between"><span>Device ID</span><span className="font-mono">esp32-001</span></div>
+          <div className="flex justify-between"><span>Device ID</span><span className="font-mono">{latestDeviceId ?? "—"}</span></div>
           <div className="flex justify-between"><span>Protocol</span><span className="font-mono">HTTPS/WSS</span></div>
           <div className="flex justify-between"><span>Firmware</span><span className="font-mono">v2.1.4</span></div>
         </div>

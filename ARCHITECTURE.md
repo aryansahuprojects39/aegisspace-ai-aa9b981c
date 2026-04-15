@@ -48,12 +48,10 @@ ______________________________________________________________________
 │  │  Dashboard Component             │ │
 │  │  ├─ TelemetryGraph               │ │
 │  │  ├─ GyroscopeGraph               │ │
-│  │  ├─ RocketDigitalTwin (3D)       │ │
 │  │  ├─ AIAnalysisPanel              │ │
 │  │  └─ DeviceConnectivity           │ │
 │  │                                  │ │
 │  │  Landing Page                    │ │
-│  │  ├─ Hero + HeroScene (3D)        │ │
 │  │  ├─ Features                     │ │
 │  │  ├─ Pricing                      │ │
 │  │  ├─ FAQ                          │ │
