@@ -181,10 +181,10 @@ See `esp32/flare_telemetry.ino` for the complete firmware source.
 Flash it to your FLARE module and configure `esp32/secrets.h` (copy from `secrets_template.h`).
 If you import `TELEMETRY_WORKFLOW.json` into n8n, set `SUPABASE_ANON_KEY` in the n8n runtime before activating the workflow. The workflow reads the key from the environment instead of storing it inline.
 
-POST JSON to the Supabase REST API (or via n8n webhook):
+The ESP32 should post JSON to the n8n webhook, and n8n should be the only component that forwards telemetry into Supabase:
 
 ```text
-POST https://your-project-id.supabase.co/rest/v1/telemetry_data
+POST https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry
 apikey: <your-anon-key>
 Content-Type: application/json
 ```

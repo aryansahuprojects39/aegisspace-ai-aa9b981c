@@ -34,7 +34,7 @@
 
   <rect x="70" y="210" width="180" height="96" rx="20" fill="url(#node)" stroke="#38bdf8" filter="url(#shadow)" />
   <text x="160" y="250" class="label">Webhook</text>
-  <text x="160" y="274" class="sub">POST /aegis-telemetry-prod</text>
+  <text x="160" y="274" class="sub">POST /aegis-telemetry</text>
 
   <rect x="300" y="210" width="240" height="96" rx="20" fill="url(#node)" stroke="#f59e0b" filter="url(#shadow)" />
   <text x="420" y="248" class="label">Validate &amp; Detect</text>

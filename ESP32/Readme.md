@@ -1,4 +1,4 @@
-# AegisSpace FLARE Module — ESP32 Firmware
+# AegisSpace FLARE Module - ESP32 Firmware
 
 Hardware interface module for the AegisSpace AI telemetry platform.
 
@@ -6,7 +6,7 @@ Hardware interface module for the AegisSpace AI telemetry platform.
 
 | Component | Interface | Purpose |
 | --- | --- | --- |
-| ESP32 DevKit v1 | — | Main MCU + WiFi |
+| ESP32 DevKit v1 | - | Main MCU + WiFi |
 | MPU6050 | I2C (SDA=21, SCL=22) | Gyroscope / accelerometer |
 | INA219 | I2C (SDA=21, SCL=22) | Voltage + current |
 | LED | GPIO 2 | Status indicator |
@@ -17,24 +17,24 @@ Both I2C devices share the same bus (address MPU6050=0x68, INA219=0x40).
 
 ```text
 ESP32          MPU6050       INA219
-3.3V  ──────── VCC           VCC
-GND   ──────── GND           GND
-GPIO21 (SDA) ─ SDA           SDA
-GPIO22 (SCL) ─ SCL           SCL
+3.3V  -------- VCC           VCC
+GND   -------- GND           GND
+GPIO21 (SDA) - SDA           SDA
+GPIO22 (SCL) - SCL           SCL
 ```
 
 ## Setup
 
-1. Install Arduino IDE 2.x and the **esp32 by Espressif** board package.
+1. Install Arduino IDE 2.x and the `esp32 by Espressif` board package.
 2. Install libraries via Library Manager:
    - `Adafruit MPU6050`
    - `Adafruit INA219`
    - `Adafruit Unified Sensor`
    - `ArduinoJson` (7.x)
-3. Copy `secrets_template.h` → `secrets.h` and fill in credentials.
+3. Copy `secrets_template.h` -> `secrets.h` and fill in credentials.
 4. Add `secrets.h` to `.gitignore`.
 5. Open `flare_telemetry.ino` in Arduino IDE.
-6. Select board: **ESP32 Dev Module** (or your specific variant).
+6. Select board: `ESP32 Dev Module` (or your specific variant).
 7. Upload.
 
 ## LED Status Codes
@@ -49,27 +49,25 @@ GPIO22 (SCL) ─ SCL           SCL
 ## Data Flow
 
 ```text
-ESP32 sensors → JSON → HTTP POST → Supabase REST API
-                                 ↑
-                           (or n8n webhook first)
+ESP32 sensors -> JSON -> HTTP POST -> n8n webhook -> Supabase REST API
 ```
 
 ## Anomaly Thresholds
 
-Defaults in `flare_telemetry.ino` — tune per mission:
+Defaults in `flare_telemetry.ino` - tune per mission:
 
 | Sensor | Warning | Critical |
 | --- | --- | --- |
-| Temperature | ≥ 70 °C | ≥ 85 °C |
-| Voltage | < 3.0 V or > 5.5 V | — |
-| Current | > 2.0 A | — |
-| Angular rate | > 250 °/s (magnitude) | — |
+| Temperature | >= 70 C | >= 85 C |
+| Voltage | < 3.0 V or > 5.5 V | - |
+| Current | > 2.0 A | - |
+| Angular rate | > 250 deg/s (magnitude) | - |
 
 ## Serial Monitor
 
-Set baud rate to **115200**. Each reading prints:
+Set baud rate to `115200`. Each reading prints:
 
 ```text
-[DATA] T=28.45°C V=3.700V I=0.4500A Gx=0.02 Gy=-0.01 Gz=0.00 anomaly=none
+[DATA] T=28.45C V=3.700V I=0.4500A Gx=0.02 Gy=-0.01 Gz=0.00 anomaly=none
 [HTTP] POST OK (201)
 ```
