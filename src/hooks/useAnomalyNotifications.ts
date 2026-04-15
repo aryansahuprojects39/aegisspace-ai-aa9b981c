@@ -87,11 +87,12 @@ export function useAnomalyNotifications() {
           if (seenIds.current.has(row.id)) return;
           seenIds.current.add(row.id);
 
+          const severityLabel = row.severity === 'critical' ? '🔴 CRITICAL' : row.severity === 'warning' ? '🟡 WARNING' : '⚠️ ANOMALY';
           toast.error(
-            `⚠️ Anomaly — ${row.anomaly_reason ?? "Abnormal reading"}`,
+            `${severityLabel} — ${row.anomaly_reason ?? "Abnormal reading"}`,
             {
-              description: `Device: ${row.device_id} | Temp: ${row.temperature?.toFixed(1) ?? "—"}°C | V: ${row.voltage?.toFixed(2) ?? "—"}V`,
-              duration: 8000,
+              description: `Device: ${row.device_id} | Temp: ${row.temperature?.toFixed(1) ?? "—"}°C | V: ${row.voltage?.toFixed(2) ?? "—"}V${row.confidence != null ? ` | Confidence: ${(row.confidence * 100).toFixed(0)}%` : ""}`,
+              duration: row.severity === 'critical' ? 12000 : 8000,
             },
           );
 

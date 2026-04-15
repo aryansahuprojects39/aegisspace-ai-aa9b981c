@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520" role="img" aria-labelledby="title desc">
+  <title id="title">AegisSpace n8n workflow</title>
+  <desc id="desc">Webhook to validation, Supabase insert, anomaly branch, and response nodes from the AegisSpace Telemetry Pipeline workflow.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="node" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f2937" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.35" />
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7dd3fc" />
+    </marker>
+    <style>
+      .label { fill: #e5eefb; font: 700 18px 'Segoe UI', Arial, sans-serif; text-anchor: middle; }
+      .sub { fill: #93c5fd; font: 500 12px 'Segoe UI', Arial, sans-serif; text-anchor: middle; }
+      .line { stroke: #7dd3fc; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+      .error { stroke: #fca5a5; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+      .tag { fill: #0b1220; stroke: #334155; rx: 10; }
+      .tagtext { fill: #cbd5e1; font: 600 11px 'Segoe UI', Arial, sans-serif; text-anchor: middle; }
+      .title { fill: #f8fafc; font: 800 28px 'Segoe UI', Arial, sans-serif; }
+      .note { fill: #94a3b8; font: 500 14px 'Segoe UI', Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="520" fill="url(#bg)" />
+  <text x="60" y="56" class="title">AegisSpace Telemetry Pipeline</text>
+  <text x="60" y="84" class="note">Derived from TELEMETRY_WORKFLOW.json and the public workflow export</text>
+
+  <rect x="70" y="210" width="180" height="96" rx="20" fill="url(#node)" stroke="#38bdf8" filter="url(#shadow)" />
+  <text x="160" y="250" class="label">Webhook</text>
+  <text x="160" y="274" class="sub">POST /aegis-telemetry-prod</text>
+
+  <rect x="300" y="210" width="240" height="96" rx="20" fill="url(#node)" stroke="#f59e0b" filter="url(#shadow)" />
+  <text x="420" y="248" class="label">Validate &amp; Detect</text>
+  <text x="420" y="272" class="label">Anomaly</text>
+  <text x="420" y="294" class="sub">Code node</text>
+
+  <rect x="590" y="210" width="220" height="96" rx="20" fill="url(#node)" stroke="#a78bfa" filter="url(#shadow)" />
+  <text x="700" y="250" class="label">Insert to Supabase</text>
+  <text x="700" y="274" class="sub">HTTP POST /rest/v1/telemetry_data</text>
+
+  <rect x="860" y="210" width="180" height="96" rx="20" fill="url(#node)" stroke="#34d399" filter="url(#shadow)" />
+  <text x="950" y="250" class="label">Is Anomaly?</text>
+  <text x="950" y="274" class="sub">Boolean IF node</text>
+
+  <rect x="1090" y="130" width="180" height="96" rx="20" fill="url(#node)" stroke="#fb7185" filter="url(#shadow)" />
+  <text x="1180" y="170" class="label">Log Anomaly</text>
+  <text x="1180" y="194" class="sub">Code node</text>
+
+  <rect x="1090" y="290" width="180" height="96" rx="20" fill="url(#node)" stroke="#38bdf8" filter="url(#shadow)" />
+  <text x="1180" y="330" class="label">Respond 201</text>
+  <text x="1180" y="354" class="sub">Webhook response</text>
+
+  <rect x="330" y="360" width="180" height="96" rx="20" fill="url(#node)" stroke="#ef4444" filter="url(#shadow)" />
+  <text x="420" y="400" class="label">Respond 400</text>
+  <text x="420" y="424" class="sub">Validation error</text>
+
+  <path class="line" d="M250 258 L300 258" />
+  <path class="line" d="M540 258 L590 258" />
+  <path class="line" d="M810 258 L860 258" />
+  <path class="line" d="M1040 258 C1060 258 1060 178 1090 178" />
+  <path class="line" d="M1040 258 C1060 258 1060 338 1090 338" />
+  <path class="line" d="M1270 178 C1310 178 1310 338 1270 338" />
+  <path class="error" d="M420 306 C420 332 420 332 420 360" />
+
+  <rect x="342" y="166" width="96" height="28" class="tag" />
+  <text x="390" y="185" class="tagtext">main</text>
+
+  <rect x="653" y="166" width="96" height="28" class="tag" />
+  <text x="701" y="185" class="tagtext">main</text>
+
+  <rect x="913" y="166" width="74" height="28" class="tag" />
+  <text x="950" y="185" class="tagtext">main</text>
+
+  <rect x="1082" y="233" width="72" height="28" class="tag" />
+  <text x="1118" y="252" class="tagtext">true</text>
+
+  <rect x="1082" y="274" width="72" height="28" class="tag" />
+  <text x="1118" y="293" class="tagtext">false</text>
+
+  <rect x="366" y="330" width="108" height="28" class="tag" />
+  <text x="420" y="349" class="tagtext">error path</text>
+</svg>

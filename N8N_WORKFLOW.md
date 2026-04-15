@@ -236,7 +236,9 @@ return [{
   "heartbeat_seq": 42,
   "uptime_ms": 210000,
   "is_anomaly": false,
-  "anomaly_reason": null
+  "anomaly_reason": null,
+  "severity": null,
+  "confidence": null
 }
 ```
 

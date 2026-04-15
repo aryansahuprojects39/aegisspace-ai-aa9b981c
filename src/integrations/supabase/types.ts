@@ -47,6 +47,7 @@ export type Database = {
       telemetry_data: {
         Row: {
           anomaly_reason: string | null
+          confidence: number | null
           created_at: string
           current: number | null
           device_id: string
@@ -55,11 +56,13 @@ export type Database = {
           gyro_z: number | null
           id: string
           is_anomaly: boolean
+          severity: string | null
           temperature: number | null
           voltage: number | null
         }
         Insert: {
           anomaly_reason?: string | null
+          confidence?: number | null
           created_at?: string
           current?: number | null
           device_id?: string
@@ -68,11 +71,13 @@ export type Database = {
           gyro_z?: number | null
           id?: string
           is_anomaly?: boolean
+          severity?: string | null
           temperature?: number | null
           voltage?: number | null
         }
         Update: {
           anomaly_reason?: string | null
+          confidence?: number | null
           created_at?: string
           current?: number | null
           device_id?: string
@@ -81,6 +86,7 @@ export type Database = {
           gyro_z?: number | null
           id?: string
           is_anomaly?: boolean
+          severity?: string | null
           temperature?: number | null
           voltage?: number | null
         }

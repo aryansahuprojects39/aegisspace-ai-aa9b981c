@@ -131,9 +131,12 @@ Create a `.env` file in the project root. **Never commit this file.**
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 VITE_SUPABASE_PROJECT_ID=your-project-id
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
 ```
 
 Get these values from: **Supabase Dashboard → Settings → API**
+You can copy the structure from `.env.example`.
 
 ### 3. Run Migrations
 
@@ -176,6 +179,7 @@ ______________________________________________________________________
 
 See `esp32/flare_telemetry.ino` for the complete firmware source.
 Flash it to your FLARE module and configure `esp32/secrets.h` (copy from `secrets_template.h`).
+If you import `TELEMETRY_WORKFLOW.json` into n8n, set `SUPABASE_ANON_KEY` in the n8n runtime before activating the workflow. The workflow reads the key from the environment instead of storing it inline.
 
 POST JSON to the Supabase REST API (or via n8n webhook):
 
@@ -214,6 +218,25 @@ npm run lint         # Run ESLint
 npm run test         # Run Vitest unit tests
 npm run test:watch   # Vitest in watch mode
 ```
+
+For a direct database connectivity check:
+
+```bash
+node test-supabase.js
+```
+
+This script reads `SUPABASE_ANON_KEY` first, then falls back to `VITE_SUPABASE_PUBLISHABLE_KEY`.
+
+______________________________________________________________________
+
+## MCP Setup
+
+The workspace-level MCP config lives in `../.mcp.json` relative to this repo and should include:
+
+- `n8n-mcp` with `Authorization: Bearer <N8N_MCP_TOKEN>`
+- `supabase` with `https://mcp.supabase.com/mcp?project_ref=uidfafhxwjrdxngicaro`
+
+After updating the token or completing Supabase OAuth, reload the Codex session so MCP servers are discovered again.
 
 ______________________________________________________________________
 
