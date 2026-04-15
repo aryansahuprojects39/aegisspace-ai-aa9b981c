@@ -72,10 +72,19 @@ const App = () => {
           return;
         }
 
+        if (response.status === 404) {
+          console.info("[N8N] Health check endpoint not found (404). Skipping proxy check.");
+          return;
+        }
+
         console.warn(`[N8N] Proxy reachable but health check returned status: ${response.status}`);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error("[N8N] Connection failed via proxy:", message);
+        if (message.includes("aborted")) {
+          console.warn("[N8N] Proxy health check aborted (timeout or network issue). Skipping error log.");
+        } else {
+          console.error("[N8N] Connection failed via proxy:", message);
+        }
       } finally {
         clearTimeout(timeout);
       }
