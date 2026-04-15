@@ -7,7 +7,7 @@ export { default as ProtectedRoute } from "./ProtectedRoute";
 export { default as AIAnalysisPanel } from "./dashboard/AIAnalysisPanel";
 export { default as DeviceConnectivity } from "./dashboard/DeviceConnectivity";
 export { default as GyroscopeGraph } from "./dashboard/GyroscopeGraph";
-export { default as RocketDigitalTwin } from "./dashboard/RocketDigitalTwin";
+
 export { default as TelemetryGraph } from "./dashboard/TelemetryGraph";
 export { default as TelemetryGridSection } from "./dashboard/TelemetryGridSection";
 

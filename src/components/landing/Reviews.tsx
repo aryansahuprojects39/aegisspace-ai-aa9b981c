@@ -24,7 +24,7 @@ const reviews = [
     role: "Founder & CEO",
     initials: "EV",
     rating: 5,
-    quote: "Best monitoring platform for small sat missions. The 3D digital twin dashboard is a game-changer for our investors and mission ops team.",
+    quote: "Best monitoring platform for small sat missions. The dashboard is a game-changer for our investors and mission ops team.",
   },
   {
     company: "RocketBay",

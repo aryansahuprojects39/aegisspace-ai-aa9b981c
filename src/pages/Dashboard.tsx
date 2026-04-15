@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import {
   ParallaxStars,
-  RocketDigitalTwin,
   TelemetryGridSection,
   AIAnalysisPanel,
   DeviceConnectivity,
@@ -121,25 +120,9 @@ const Dashboard = () => {
           <TelemetryGridSection data={telemetry} loading={telemetryLoading} />
         </motion.div>
 
-        {/* Digital Twin + AI Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="lg:col-span-2 glass rounded-2xl p-4 min-h-[320px] card-tilt">
-            <div className="flex items-center gap-2 mb-2">
-              <Rocket className="w-4 h-4 text-primary" />
-              <span className="text-xs font-semibold text-foreground">3D Digital Twin — Launch Vehicle</span>
-              <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full ${hasAnomaly ? "bg-destructive/20 text-destructive" : "bg-primary/20 text-primary"}`}>
-                {statusLabel}
-              </span>
-            </div>
-            <RocketDigitalTwin
-              gyroX={latest?.gyro_x || 0}
-              gyroY={latest?.gyro_y || 0}
-              gyroZ={latest?.gyro_z || 0}
-              isAnomaly={!!hasAnomaly}
-            />
-          </motion.div>
 
+        {/* AI Panel Only (Digital Twin removed) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <AIAnalysisPanel telemetry={telemetry} />
           </motion.div>

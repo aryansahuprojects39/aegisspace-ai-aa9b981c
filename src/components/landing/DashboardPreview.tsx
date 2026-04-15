@@ -61,12 +61,12 @@ const DashboardPreview = () => {
               </div>
             ))}
 
-            {/* Center: digital twin placeholder */}
+            {/* Center: dashboard placeholder (digital twin removed) */}
             <div className="glass rounded-xl p-4 col-span-3 lg:col-span-2 lg:row-span-2 flex flex-col items-center justify-center min-h-[180px]">
               <div className="w-20 h-20 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center mb-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 animate-pulse" />
               </div>
-              <span className="text-xs text-muted-foreground">3D Digital Twin</span>
+              <span className="text-xs text-muted-foreground">Live Dashboard</span>
               <span className="text-[10px] text-muted-foreground/50 mt-1">Waiting for FLARE data…</span>
             </div>
 
