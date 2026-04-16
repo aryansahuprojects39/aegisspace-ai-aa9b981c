@@ -126,10 +126,10 @@ npm install   # or: bun install
 Create a `.env` file in the project root. **Never commit this file.**
 
 ```env
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_URL=https://uidfafhxwjrdxngicaro.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 VITE_SUPABASE_PROJECT_ID=your-project-id
-SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_URL=https://uidfafhxwjrdxngicaro.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 ```
 
@@ -169,7 +169,7 @@ npx supabase secrets set LOVABLE_API_KEY=your-lovable-api-key
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Open [http://localhost:8080](http://localhost:8080).
 
 ______________________________________________________________________
 
