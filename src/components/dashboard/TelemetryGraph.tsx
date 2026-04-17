@@ -50,6 +50,8 @@ interface Props {
   data: TelemetryRow[];
   loading: boolean;
   thresholds?: ThresholdZone;
+  /** Substrings to match against anomaly_reason — restricts anomaly highlight to this parameter only */
+  anomalyKeys?: string[];
 }
 
 const TIME_RANGES = [
@@ -128,7 +130,8 @@ const CustomTooltip = ({ active, payload, unit, normalRange, thresholds, title }
 };
 
 const AnomalyDot = ({ cx, cy, payload }: AnomalyDotProps) => {
-  if (!payload?.is_anomaly) return null;
+  // Use _paramAnomaly (set per-graph) instead of raw is_anomaly to avoid all graphs lighting up
+  if (!(payload as TelemetryRow & { _paramAnomaly?: boolean })?._paramAnomaly) return null;
   if (typeof cx !== "number" || typeof cy !== "number") return null;
   return (
     <g>
@@ -141,13 +144,23 @@ const AnomalyDot = ({ cx, cy, payload }: AnomalyDotProps) => {
   );
 };
 
-const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, data, loading, thresholds }: Props) => {
+const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, data, loading, thresholds, anomalyKeys }: Props) => {
   const [range, setRange] = useState<number>(50);
 
   const visibleData = useMemo(() => data.slice(-range), [data, range]);
   const latestValue = visibleData.length > 0 ? visibleData[visibleData.length - 1][dataKey] : null;
   const prevValue = visibleData.length > 1 ? visibleData[visibleData.length - 2][dataKey] : null;
-  const hasAnomaly = visibleData.length > 0 && visibleData[visibleData.length - 1]?.is_anomaly;
+
+  // BUG FIX: was `latest.is_anomaly` — that flag is row-level so ALL graphs turned red for any anomaly.
+  // Now we check if this graph's own parameter is named in anomaly_reason.
+  const isParamAnomaly = (row: TelemetryRow) => {
+    if (!row.is_anomaly) return false;
+    if (!anomalyKeys?.length) return row.is_anomaly; // no keys = fallback to row flag
+    const reason = row.anomaly_reason ?? "";
+    return anomalyKeys.some((k) => reason.includes(k));
+  };
+
+  const hasAnomaly = visibleData.length > 0 && isParamAnomaly(visibleData[visibleData.length - 1]);
   const fillGradientId = `fill-${dataKey}`;
   const strokeGradientId = `stroke-${dataKey}`;
 
@@ -157,13 +170,15 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
   }, [latestValue, prevValue]);
 
   const chartData = useMemo(() => {
-    const projected = linearExtrapolate(visibleData, dataKey, 2);
-    return [...visibleData, ...projected];
-  }, [visibleData, dataKey]);
+    // Tag each row with _paramAnomaly so AnomalyDot only fires for this parameter's anomaly
+    const tagged = visibleData.map((d) => ({ ...d, _paramAnomaly: isParamAnomaly(d) }));
+    const projected = linearExtrapolate(tagged, dataKey, 2);
+    return [...tagged, ...projected];
+  }, [visibleData, dataKey, anomalyKeys]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const anomalyTimestamps = useMemo(
-    () => visibleData.filter((d) => d.is_anomaly).map((d) => d.created_at),
-    [visibleData]
+    () => visibleData.filter(isParamAnomaly).map((d) => d.created_at),
+    [visibleData, anomalyKeys] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // FIX: compute Y domain from actual data values only (not ReferenceArea)

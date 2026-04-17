@@ -21,6 +21,28 @@ interface AIAnalysisPanelProps {
 
 const REMOTE_AI_ENABLED = import.meta.env.VITE_ENABLE_REMOTE_AI_ANALYSIS === "true";
 
+// BUG FIX: was a single generic recommendation based only on status level.
+// That meant a temperature anomaly showed the same text as a current/voltage anomaly.
+// Now picks the most severe detected risk and gives a specific recommendation.
+const buildSpecificRecommendation = (risks: string[], status: AIAnalysis["status"]): string => {
+  if (status === "nominal") return "No action required beyond standard monitoring cadence.";
+  const r = risks.join(" ").toLowerCase();
+  if (r.includes("critical temp") || r.includes("high temp"))
+    return "Reduce computational load and check thermal management — temperature approaching danger zone.";
+  if (r.includes("overvoltage") || r.includes("low voltage"))
+    return "Inspect power supply rail and battery connections — voltage outside safe operating range.";
+  if (r.includes("overcurrent"))
+    return "Check for short circuits or overloaded components drawing excess current.";
+  if (r.includes("angular") || r.includes("vibration"))
+    return "Verify structural mounting integrity — high angular rate or vibration detected.";
+  if (r.includes("rf") || r.includes("motion"))
+    return "Investigate RF environment and motion source — possible interference or physical disturbance.";
+  // fallback
+  return status === "critical"
+    ? "Pause mission-critical operations and inspect all hardware sensors immediately."
+    : "Continue monitoring and schedule a subsystem check if trend persists.";
+};
+
 const buildLocalAnalysis = (rows: TelemetryRow[]): AIAnalysis => {
   const latest = rows[rows.length - 1];
   if (!latest) {
@@ -68,12 +90,7 @@ const buildLocalAnalysis = (rows: TelemetryRow[]): AIAnalysis => {
           : "All monitored parameters are within expected operating range.",
     details: `Latest sample from ${latest.device_id} at ${new Date(latest.created_at).toLocaleString()}. T:${temp.toFixed(1)}°C V:${voltage.toFixed(2)}V I:${current.toFixed(3)}A Gyro:${gyroMag.toFixed(1)}°/s`,
     risks,
-    recommendation:
-      status === "critical"
-        ? "Pause mission-critical operations and inspect hardware sensors immediately."
-        : status === "warning"
-          ? "Continue monitoring and schedule a subsystem check if trend persists."
-          : "No action required beyond standard monitoring cadence.",
+    recommendation: buildSpecificRecommendation(risks, status),
   };
 };
 

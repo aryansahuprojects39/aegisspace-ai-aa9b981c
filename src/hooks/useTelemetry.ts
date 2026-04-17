@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 type TelemetryRow = Tables<"telemetry_data">;
-const ACTIVE_WINDOW_MS = 60 * 1000;
+const ACTIVE_WINDOW_MS = 10 * 60 * 1000; // 10 min rolling window — was 60 s which wiped the graph after 1 min
 
 const isFresh = (row: Pick<TelemetryRow, "created_at">) => {
   const ts = new Date(row.created_at).getTime();
