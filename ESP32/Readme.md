@@ -31,11 +31,23 @@ GPIO22 (SCL) - SCL           SCL
    - `Adafruit INA219`
    - `Adafruit Unified Sensor`
    - `ArduinoJson` (7.x)
-3. Copy `secrets_template.h` -> `secrets.h` and fill in credentials.
+3. Copy `secrets_template.h` -> `secrets.h` and fill in credentials including `WEBHOOK_API_KEY`.
 4. Add `secrets.h` to `.gitignore`.
-5. Open `flare_telemetry.ino` in Arduino IDE.
-6. Select board: `ESP32 Dev Module` (or your specific variant).
-7. Upload.
+5. Generate a strong API key: `openssl rand -hex 32`
+6. Set the same key as `AEGIS_WEBHOOK_API_KEY` in your n8n environment variables.
+7. Open `flare_telemetry.ino` in Arduino IDE.
+8. Select board: `ESP32 Dev Module` (or your specific variant).
+9. Upload.
+
+## Authentication
+
+Every POST to n8n includes an `X-API-Key` header with the shared secret defined in `secrets.h`:
+
+```cpp
+#define WEBHOOK_API_KEY "your-generated-secret"
+```
+
+n8n validates this key before processing any payload. Requests without the correct key are rejected. This prevents unauthorized devices from injecting fake telemetry data.
 
 ## LED Status Codes
 

@@ -103,6 +103,40 @@ https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry
 
 ---
 
+### Node 1.5: Authenticate Request (API Key Check)
+
+**Purpose:** Reject requests that lack a valid shared secret before any processing occurs.
+
+**Type:** Code Node (JavaScript)
+
+**Logic:**
+
+```javascript
+// API Key Authentication
+// The ESP32 sends X-API-Key header with every POST.
+// Set AEGIS_WEBHOOK_API_KEY in n8n environment variables.
+
+const headers = $input.first().json.headers ?? {};
+const incomingKey = headers["x-api-key"] ?? headers["X-API-Key"] ?? "";
+const expectedKey = $env["AEGIS_WEBHOOK_API_KEY"] ?? "";
+
+if (!expectedKey) {
+  throw new Error("Server misconfiguration: AEGIS_WEBHOOK_API_KEY not set");
+}
+
+// Constant-time comparison (avoids timing attacks)
+if (incomingKey.length !== expectedKey.length ||
+    !incomingKey.split("").every((c, i) => c === expectedKey[i])) {
+  throw new Error("Unauthorized: invalid or missing API key");
+}
+
+return $input.all();
+```
+
+**Setup:** Generate secret with `openssl rand -hex 32`. Set `AEGIS_WEBHOOK_API_KEY` in n8n environment variables (same value as `WEBHOOK_API_KEY` in ESP32 secrets.h). Place this node between Webhook and Validate nodes.
+
+---
+
 ### Node 2: Validate & Detect Anomaly
 
 **Purpose:** Server-side validation and anomaly detection (defense-in-depth)

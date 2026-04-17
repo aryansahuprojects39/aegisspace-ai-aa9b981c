@@ -169,7 +169,7 @@ npx supabase secrets set LOVABLE_API_KEY=your-lovable-api-key
 npm run dev
 ```
 
-Open [http://localhost:8080](http://localhost:8080).
+Open [http://localhost:8080](http://localhost:8080) (default local port is 8080, as set in vite.config.ts).
 
 ______________________________________________________________________
 

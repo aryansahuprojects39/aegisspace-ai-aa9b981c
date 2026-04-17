@@ -11,18 +11,41 @@ import {
   AIAnalysisPanel,
   DeviceConnectivity,
 } from "@/components";
+import AIHistoryPanel, { type HistoryEntry } from "@/components/dashboard/AIHistoryPanel";
+import type { AIAnalysis } from "@/components/dashboard/AIAnalysisPanel";
 import { useTelemetry, useAnomalyNotifications } from "@/hooks";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: telemetry, loading: telemetryLoading } = useTelemetry(50);
   useAnomalyNotifications();
+
   const latest = telemetry.length > 0 ? telemetry[telemetry.length - 1] : null;
   const hasAnomaly = latest?.is_anomaly;
   const statusColor = !latest ? "bg-muted" : hasAnomaly ? "bg-destructive" : "bg-primary";
   const statusLabel = !latest ? "Standby" : hasAnomaly ? "Anomaly" : "Nominal";
+
+  // AI analysis history state — kept in Dashboard so it persists across re-renders
+  // and can be shared/cleared from here
+  const [aiHistory, setAiHistory] = useState<HistoryEntry[]>([]);
+
+  const handleAnalysisComplete = useCallback((analysis: AIAnalysis, timestamp: string) => {
+    setAiHistory((prev) => {
+      const entry: HistoryEntry = {
+        id: `${timestamp}-${Math.random().toString(36).slice(2, 7)}`,
+        timestamp,
+        analysis,
+      };
+      // Newest first, keep max 50 entries
+      return [entry, ...prev].slice(0, 50);
+    });
+  }, []);
+
+  const handleClearHistory = useCallback(() => {
+    setAiHistory([]);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -83,6 +106,10 @@ const Dashboard = () => {
                 <Clock className="w-3.5 h-3.5 text-primary" />
                 <span>Points: {telemetry.length}</span>
               </div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Activity className="w-3.5 h-3.5 text-primary" />
+                <span>Analyses: {aiHistory.length}</span>
+              </div>
             </div>
           </div>
 
@@ -120,19 +147,45 @@ const Dashboard = () => {
           <TelemetryGridSection data={telemetry} loading={telemetryLoading} />
         </motion.div>
 
-
-        {/* AI Panel Only */}
+        {/* AI Analysis + History Panel side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <AIAnalysisPanel telemetry={telemetry} />
+          {/* AI Analysis — 1 col */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="lg:col-span-1"
+          >
+            <AIAnalysisPanel
+              telemetry={telemetry}
+              onAnalysisComplete={handleAnalysisComplete}
+            />
+          </motion.div>
+
+          {/* History Panel — 2 cols */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="lg:col-span-2"
+            style={{ minHeight: "260px" }}
+          >
+            <AIHistoryPanel
+              history={aiHistory}
+              onClear={handleClearHistory}
+            />
           </motion.div>
         </div>
 
         {/* Bottom Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           {/* Data Stream */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="glass rounded-2xl p-4 card-tilt">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="glass rounded-2xl p-4 card-tilt"
+          >
             <div className="flex items-center gap-2 mb-3">
               <Activity className="w-4 h-4 text-primary" />
               <span className="text-xs font-semibold text-foreground">Data Stream</span>
@@ -154,7 +207,11 @@ const Dashboard = () => {
           </motion.div>
 
           {/* Device Connectivity */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
             <DeviceConnectivity
               isConnected={telemetry.length > 0}
               dataPoints={telemetry.length}
@@ -163,15 +220,22 @@ const Dashboard = () => {
           </motion.div>
 
           {/* Mini Radar */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-            className="glass rounded-2xl p-6 flex flex-col items-center justify-center card-tilt">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="glass rounded-2xl p-6 flex flex-col items-center justify-center card-tilt"
+          >
             <div className="relative w-24 h-24">
               <div className="absolute inset-0 rounded-full border border-primary/20" />
               <div className="absolute inset-3 rounded-full border border-primary/15" />
               <div className="absolute inset-6 rounded-full border border-primary/10" />
               <Radio className="w-4 h-4 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
               {telemetry.length > 0 && (
-                <div className="absolute inset-0 rounded-full border-t-2 border-primary/40 animate-spin" style={{ animationDuration: "3s" }} />
+                <div
+                  className="absolute inset-0 rounded-full border-t-2 border-primary/40 animate-spin"
+                  style={{ animationDuration: "3s" }}
+                />
               )}
             </div>
             <span className="text-xs text-muted-foreground mt-3">Tracking Radar</span>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, ReferenceArea
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
@@ -58,8 +58,9 @@ const TIME_RANGES = [
   { label: "All", points: 50 },
 ] as const;
 
+// FIX: use value == null (not !value) so 0 is treated as valid
 function getStatus(value: number | null, thresholds?: ThresholdZone): "Normal" | "Warning" | "Critical" {
-  if (!value || !thresholds) return "Normal";
+  if (value == null || !thresholds) return "Normal";
   if (value < thresholds.criticalLow || value > thresholds.criticalHigh) return "Critical";
   if (value < thresholds.warningLow || value > thresholds.warningHigh) return "Warning";
   return "Normal";
@@ -165,6 +166,23 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
     [visibleData]
   );
 
+  // FIX: compute Y domain from actual data values only (not ReferenceArea)
+  // This prevents recharts from scaling the axis to include far-off reference zones
+  const yDomain = useMemo((): [number, number] | ["auto", "auto"] => {
+    const values = visibleData
+      .map((d) => d[dataKey])
+      .filter((v): v is number => v != null);
+    if (values.length === 0) return ["auto", "auto"];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const spread = max - min || Math.abs(max) * 0.15 || 1;
+    const pad = spread * 0.35;
+    return [
+      parseFloat((min - pad).toFixed(3)),
+      parseFloat((max + pad).toFixed(3)),
+    ];
+  }, [visibleData, dataKey]);
+
   const status = getStatus(latestValue, thresholds);
 
   return (
@@ -195,6 +213,9 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
                 {Math.abs(changePercent).toFixed(1)}%
               </span>
             )}
+            <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${status === "Critical" ? "bg-destructive/15 text-destructive" : status === "Warning" ? "bg-yellow-400/15 text-yellow-400" : "bg-primary/10 text-primary"}`}>
+              {status}
+            </span>
             <span className="text-sm font-mono font-bold" style={{ color }}>
               {latestValue.toFixed(1)}
               <span className="text-[10px] text-muted-foreground ml-0.5">{unit}</span>
@@ -243,15 +264,52 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 20% 30% / 0.15)" />
                 <XAxis dataKey="created_at" hide />
-                <YAxis domain={["auto", "auto"]} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} width={35} />
+                {/* FIX: use data-driven domain so reference areas don't distort scale */}
+                <YAxis domain={yDomain} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} width={35} />
                 <Tooltip content={<CustomTooltip unit={unit} normalRange={normalRange} thresholds={thresholds} title={title} />} />
 
-                {/* Threshold zones */}
+                {/*
+                  FIX: Reference zones now correctly represent only the WARNING and CRITICAL bands.
+                  Previously, the yellow zone spanned warningLow→warningHigh which IS the normal range,
+                  making all normal data appear inside a yellow zone (false anomaly visual).
+                  
+                  Correct mapping (e.g. temperature):
+                    criticalLow (0) — warningLow (10):  warning low band (orange-yellow)
+                    warningHigh (50) — criticalHigh (60): warning high band (orange-yellow)
+                    below criticalLow (0):               critical zone (red)
+                    above criticalHigh (60):             critical zone (red)
+                    warningLow (10) — warningHigh (50):  NORMAL — no fill
+                */}
                 {thresholds && (
                   <>
-                    <ReferenceArea y1={thresholds.warningLow} y2={thresholds.warningHigh} fill="#FFD93D" fillOpacity={0.03} />
-                    <ReferenceArea y1={thresholds.criticalHigh} y2={thresholds.criticalHigh + 50} fill="#FF4444" fillOpacity={0.04} />
-                    <ReferenceArea y1={thresholds.criticalLow - 50} y2={thresholds.criticalLow} fill="#FF4444" fillOpacity={0.04} />
+                    {/* Warning low band: between criticalLow and warningLow */}
+                    <ReferenceArea
+                      y1={thresholds.criticalLow}
+                      y2={thresholds.warningLow}
+                      fill="#FFD93D"
+                      fillOpacity={0.07}
+                    />
+                    {/* Warning high band: between warningHigh and criticalHigh */}
+                    <ReferenceArea
+                      y1={thresholds.warningHigh}
+                      y2={thresholds.criticalHigh}
+                      fill="#FFD93D"
+                      fillOpacity={0.07}
+                    />
+                    {/* Critical high zone: above criticalHigh — use a tight bound to avoid domain blowup */}
+                    <ReferenceArea
+                      y1={thresholds.criticalHigh}
+                      y2={thresholds.criticalHigh + 15}
+                      fill="#FF4444"
+                      fillOpacity={0.08}
+                    />
+                    {/* Critical low zone: below criticalLow */}
+                    <ReferenceArea
+                      y1={thresholds.criticalLow - 15}
+                      y2={thresholds.criticalLow}
+                      fill="#FF4444"
+                      fillOpacity={0.08}
+                    />
                   </>
                 )}
 

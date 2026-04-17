@@ -60,7 +60,7 @@ const FlipCard = ({ feature, index }: { feature: typeof features[0]; index: numb
     transition={{ duration: 0.5, delay: index * 0.1 }}
     className="group perspective-1000 h-[320px]"
   >
-    <div className="flip-card-inner relative w-full h-full transition-transform duration-700 group-hover:[transform:rotateY(180deg)]">
+    <div className="flip-card-inner relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
       {/* Front */}
       <div className="absolute inset-0 [backface-visibility:hidden] glass rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-4 border border-border/30">
         <div className="w-14 h-14 rounded-xl gradient-cyan-pink flex items-center justify-center">

@@ -449,6 +449,7 @@ ______________________________________________________________________
 | Service Role Secret | Only in Edge Functions              |
 | CORS                | Supabase auto-configured            |
 | Rate Limiting       | Supabase built-in                   |
+| ESP32 → n8n Auth    | `X-API-Key` header + `AEGIS_WEBHOOK_API_KEY` env var in n8n |
 
 ______________________________________________________________________
 

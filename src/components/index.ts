@@ -5,9 +5,9 @@ export { default as ProtectedRoute } from "./ProtectedRoute";
 
 // Dashboard components
 export { default as AIAnalysisPanel } from "./dashboard/AIAnalysisPanel";
+export { default as AIHistoryPanel } from "./dashboard/AIHistoryPanel";
 export { default as DeviceConnectivity } from "./dashboard/DeviceConnectivity";
 export { default as GyroscopeGraph } from "./dashboard/GyroscopeGraph";
-
 export { default as TelemetryGraph } from "./dashboard/TelemetryGraph";
 export { default as TelemetryGridSection } from "./dashboard/TelemetryGridSection";
 

@@ -226,6 +226,7 @@ bool postReading(const Reading& r, unsigned long heartbeatSeq) {
   String url = String(N8N_WEBHOOK_URL);
   http.begin(client, url);
   http.addHeader("Content-Type",  "application/json");
+  http.addHeader("X-API-Key", WEBHOOK_API_KEY); // shared secret auth
 
   JsonDocument doc;
   doc["device_id"]              = DEVICE_ID;
