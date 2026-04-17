@@ -200,8 +200,10 @@ const TelemetryGraph = ({ title, icon: Icon, dataKey, color, unit, normalRange, 
 
   const status = getStatus(latestValue, thresholds);
 
+  // Animation bugfix: force chart to re-animate by using a key tied to data length
   return (
     <motion.div
+      key={visibleData.length}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}

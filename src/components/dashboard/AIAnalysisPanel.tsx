@@ -107,6 +107,10 @@ const AIAnalysisPanel = ({ telemetry, onAnalysisComplete }: AIAnalysisPanelProps
   // Track last analyzed data length to avoid redundant runs
   const lastAnalyzedLenRef = useRef(0);
 
+  // Ensure onAnalysisComplete is always up-to-date and stable
+  const onAnalysisCompleteRef = useRef(onAnalysisComplete);
+  useEffect(() => { onAnalysisCompleteRef.current = onAnalysisComplete; }, [onAnalysisComplete]);
+
   const runAnalysis = useCallback(async () => {
     const current = telemetryRef.current;
     if (current.length === 0) return;
@@ -128,13 +132,13 @@ const AIAnalysisPanel = ({ telemetry, onAnalysisComplete }: AIAnalysisPanelProps
       }
 
       setAnalysis(result);
-      onAnalysisComplete?.(result, new Date().toISOString());
+      onAnalysisCompleteRef.current?.(result, new Date().toISOString());
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Analysis failed");
     } finally {
       setLoading(false);
     }
-  }, [onAnalysisComplete]);
+  }, []);
 
   // FIX: Auto-refresh on every new telemetry point (like the graphs).
   // Previously had `if (!analysis)` guard which only ran once.
