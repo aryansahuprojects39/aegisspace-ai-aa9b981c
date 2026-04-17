@@ -146,7 +146,7 @@ const AIHistoryPanel = ({ history, onClear }: AIHistoryPanelProps) => {
   );
 
   return (
-    <div className="glass rounded-2xl p-4 card-tilt h-full flex flex-col">
+    <div className="glass rounded-2xl p-4 card-tilt h-full flex flex-col" style={{ maxHeight: '420px', minHeight: '260px' }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ const AIHistoryPanel = ({ history, onClear }: AIHistoryPanelProps) => {
       )}
 
       {/* Entry list */}
-      <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border/30">
+      <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 scrollbar-web" style={{ maxHeight: '320px' }}>
         {history.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center gap-2 border border-dashed border-border/30 rounded-xl">
             <History className="w-8 h-8 text-muted-foreground/20" />

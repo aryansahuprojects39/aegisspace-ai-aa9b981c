@@ -106,8 +106,8 @@ const GyroscopeGraph = ({ data, loading }: { data: TelemetryRow[]; loading: bool
     [visibleData]
   );
 
+  // Animation bugfix: force chart to re-animate by using a key tied to data length
   return (
-    {/* Animation bugfix: force chart to re-animate by using a key tied to data length */}
     <motion.div
       key={visibleData.length}
       initial={{ opacity: 0, y: 16 }}

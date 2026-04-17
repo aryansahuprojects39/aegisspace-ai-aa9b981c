@@ -12,7 +12,7 @@ import {
   DeviceConnectivity,
 } from "@/components";
 import AIHistoryPanel, { type HistoryEntry } from "@/components/dashboard/AIHistoryPanel";
-import type { AIAnalysis } from "@/components/dashboard/AIAnalysisPanel";
+import { buildLocalAnalysis, type AIAnalysis } from "@/components/dashboard/AIAnalysisPanel";
 import { useTelemetry, useAnomalyNotifications } from "@/hooks";
 import { useCallback, useState } from "react";
 
@@ -54,9 +54,29 @@ const Dashboard = () => {
 
   const handleExportCSV = useCallback(() => {
     if (telemetry.length === 0) return;
-    const headers = ["timestamp", "temperature", "voltage", "current", "gyro_x", "gyro_y", "gyro_z", "is_anomaly", "anomaly_reason"];
-    const rows = telemetry.map((r) =>
-      [
+    // For each telemetry row, run the same AI analysis logic as the dashboard
+    const getAnalysis = (row, idx) => {
+      // Use the last 10 points up to and including this row for context
+      const window = telemetry.slice(Math.max(0, idx - 9), idx + 1);
+      return buildLocalAnalysis(window);
+    };
+    const headers = [
+      "timestamp",
+      "temperature",
+      "voltage",
+      "current",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z",
+      "is_anomaly",
+      "anomaly_reason",
+      "ai_status",
+      "ai_summary",
+      "ai_recommendation"
+    ];
+    const rows = telemetry.map((r, idx) => {
+      const ai = getAnalysis(r, idx);
+      return [
         r.created_at,
         r.temperature ?? "",
         r.voltage ?? "",
@@ -66,8 +86,11 @@ const Dashboard = () => {
         r.gyro_z ?? "",
         r.is_anomaly,
         r.anomaly_reason ?? "",
-      ].join(",")
-    );
+        ai.status,
+        ai.summary.replace(/\n/g, " ").replace(/,/g, ";"),
+        ai.recommendation.replace(/\n/g, " ").replace(/,/g, ";")
+      ].join(",");
+    });
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -153,7 +176,7 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.15 }}
             className="lg:col-span-1"
           >
             <AIAnalysisPanel
@@ -166,7 +189,7 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.22 }}
             className="lg:col-span-2"
             style={{ minHeight: "260px" }}
           >
@@ -190,7 +213,7 @@ const Dashboard = () => {
               <Activity className="w-4 h-4 text-primary" />
               <span className="text-xs font-semibold text-foreground">Data Stream</span>
             </div>
-            <div className="h-32 overflow-y-auto space-y-1 scrollbar-thin">
+            <div className="h-32 overflow-y-auto space-y-1 scrollbar-web">
               {telemetry.length === 0 ? (
                 <div className="h-full flex items-center justify-center border border-dashed border-border rounded-xl">
                   <span className="text-xs text-muted-foreground/50">No data stream active</span>

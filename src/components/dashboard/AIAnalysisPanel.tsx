@@ -43,7 +43,7 @@ const buildSpecificRecommendation = (risks: string[], status: AIAnalysis["status
     : "Continue monitoring and schedule a subsystem check if trend persists.";
 };
 
-const buildLocalAnalysis = (rows: TelemetryRow[]): AIAnalysis => {
+export const buildLocalAnalysis = (rows: TelemetryRow[]): AIAnalysis => {
   const latest = rows[rows.length - 1];
   if (!latest) {
     return {
