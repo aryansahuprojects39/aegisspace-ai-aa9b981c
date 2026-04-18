@@ -566,12 +566,13 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## ESP32 FLARE Module
 
-### File: `esp32/flare_telemetry.ino`
+## FLARE Module
+
+### File: `FLARE/flare_telemetry.ino`
 
 ```text
-esp32/
+FLARE/
 ├── flare_telemetry.ino     # Main firmware (Arduino IDE)
 ├── secrets_template.h      # Credential template (copy → secrets.h)
 └── README.md               # Wiring, library deps, LED codes
@@ -583,18 +584,18 @@ esp32/
 | -------------- | ---------------------------- | ------------------------ |
 | MPU6050        | Adafruit MPU6050             | gyro_x/y/z (°/s)         |
 | INA219         | Adafruit INA219              | voltage (V), current (A) |
-| ESP32 internal | built-in `temperatureRead()` | temperature (°C)         |
+| FLARE internal | built-in `temperatureRead()` | temperature (°C)         |
 
 ### Anomaly Detection (on-device)
 
-Anomalies are flagged on the ESP32 before posting — no round-trip to the server required for detection.
+Anomalies are flagged on the FLARE before posting — no round-trip to the server required for detection.
 The `is_anomaly` and `anomaly_reason` fields are set in firmware and stored verbatim in Postgres.
 
 ### POST Payload
 
 ```json
 {
-  "device_id": "esp32-001",
+   "device_id": "FLARE-001",
   "temperature": 28.45,
   "voltage": 3.700,
   "current": 0.4500,

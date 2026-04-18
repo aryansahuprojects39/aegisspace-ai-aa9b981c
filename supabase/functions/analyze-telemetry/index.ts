@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
 
   const prompt =
     `You are AegisSpace AI, an expert satellite launch telemetry analyst.\n` +
-    `Analyse the following ESP32 FLARE sensor readings and return a concise mission assessment.\n\n` +
+    `Analyse the following FLARE sensor readings and return a concise mission assessment.\n\n` +
     `Total readings in session: ${telemetryData.length}\n` +
     `Anomalies flagged: ${anomalies.length}\n\n` +
     `Last 5 readings:\n${JSON.stringify(recent, null, 2)}\n\n` +

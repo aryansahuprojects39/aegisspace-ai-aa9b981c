@@ -27,6 +27,6 @@ CREATE POLICY "Device or authenticated users can insert telemetry"
   ON public.telemetry_data FOR INSERT
   TO anon, authenticated
   WITH CHECK (
-    -- device_id must look like esp32-NNN or be any authenticated user
-    device_id ~ '^esp32-[a-zA-Z0-9\-]+$' OR auth.role() = 'authenticated'
+    -- device_id must look like FLARE-NNN or be any authenticated user
+    device_id ~ '^FLARE-[a-zA-Z0-9\-]+$' OR auth.role() = 'authenticated'
   );

@@ -2,7 +2,7 @@
 -- Create telemetry_data table
 CREATE TABLE public.telemetry_data (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-  device_id TEXT NOT NULL DEFAULT 'esp32-001',
+  device_id TEXT NOT NULL DEFAULT 'FLARE-001',
   temperature DOUBLE PRECISION,
   voltage DOUBLE PRECISION,
   current DOUBLE PRECISION,

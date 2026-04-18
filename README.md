@@ -173,13 +173,14 @@ Open [http://localhost:8080](http://localhost:8080) (default local port is 8080,
 
 ______________________________________________________________________
 
-## Sending Telemetry (ESP32 / n8n)
 
-See `esp32/flare_telemetry.ino` for the complete firmware source.
-Flash it to your FLARE module and configure `esp32/secrets.h` (copy from `secrets_template.h`).
+## Sending Telemetry (FLARE / n8n)
+
+See `FLARE/flare_telemetry.ino` for the complete firmware source.
+Flash it to your FLARE module and configure `FLARE/secrets.h` (copy from `secrets_template.h`).
 If you import `TELEMETRY_WORKFLOW.json` into n8n, set `SUPABASE_ANON_KEY` in the n8n runtime before activating the workflow. The workflow reads the key from the environment instead of storing it inline.
 
-The ESP32 should post JSON to the n8n webhook, and n8n should be the only component that forwards telemetry into Supabase:
+The FLARE should post JSON to the n8n webhook, and n8n should be the only component that forwards telemetry into Supabase:
 
 ```text
 POST https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry
@@ -189,7 +190,7 @@ Content-Type: application/json
 
 ```json
 {
-  "device_id": "esp32-001",
+  "device_id": "FLARE-001",
   "temperature": 28.4,
   "voltage": 3.7,
   "current": 0.45,

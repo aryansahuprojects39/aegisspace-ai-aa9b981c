@@ -446,13 +446,14 @@ High angular rate (367.4 deg/s)
 
 ## Configuration
 
-### ESP32 Setup
 
-Add to `esp32/secrets.h`:
+### FLARE Setup
+
+Add to `FLARE/secrets.h`:
 
 ```cpp
 #define N8N_WEBHOOK_URL "https://aryan3929.app.n8n.cloud/webhook/aegis-telemetry"
-#define DEVICE_ID "esp32-001"
+#define DEVICE_ID "FLARE-001"
 ```
 
 ### Supabase Configuration
