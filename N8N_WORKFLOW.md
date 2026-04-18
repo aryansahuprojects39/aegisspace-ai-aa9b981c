@@ -244,7 +244,7 @@ return [{
 | Property | Value |
 | --- | --- |
 | Method | POST |
-| URL | `https://uidfafhxwjrdxngicaro.supabase.co/rest/v1/telemetry_data` |
+| URL | `https://lsugsoavpzqzziglqxxz.supabase.co/rest/v1/telemetry_data` |
 | Content-Type | `application/json` |
 
 **Headers:**

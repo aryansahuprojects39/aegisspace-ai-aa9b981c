@@ -28,10 +28,10 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://uidfafhxwjrdxngicaro.supabase.co/rest/v1/telemetry_data",
+        "url": "https://lsugsoavpzqzziglqxxz.supabase.co/rest/v1/telemetry_data",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [
+              "url": "https://lsugsoavpzqzziglqxxz.supabase.co/rest/v1/telemetry_data",
             { "name": "apikey",        "value": "={{ $env.SUPABASE_ANON_KEY }}" },
             { "name": "Authorization", "value": "={{ 'Bearer ' + $env.SUPABASE_ANON_KEY }}" },
             { "name": "Content-Type",  "value": "application/json" },

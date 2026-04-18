@@ -9,7 +9,7 @@ declare const Deno: {
 // AI backend: Anthropic Claude (claude-sonnet-4-6) called directly.
 // Secret required: ANTHROPIC_API_KEY
 // Set via: npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-... \
-//            --project-ref uidfafhxwjrdxngicaro
+//            --project-ref lsugsoavpzqzziglqxxz
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

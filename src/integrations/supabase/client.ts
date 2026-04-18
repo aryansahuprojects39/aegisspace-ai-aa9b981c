@@ -11,6 +11,15 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   );
 }
 
+// Purge stale Supabase sessions if project changes (after const declarations)
+try {
+  const currentProject = new URL(SUPABASE_URL).hostname.split('.')[0];
+  const staleKeys = Object.keys(localStorage).filter(
+    (k) => k.startsWith('sb-') && !k.includes(currentProject)
+  );
+  staleKeys.forEach((k) => localStorage.removeItem(k));
+} catch { /* SSR or localStorage unavailable */ }
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 

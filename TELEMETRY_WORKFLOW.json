@@ -28,7 +28,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://uidfafhxwjrdxngicaro.supabase.co/rest/v1/telemetry_data",
+        "url": "https://lsugsoavpzqzziglqxxz.supabase.co/rest/v1/telemetry_data",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
