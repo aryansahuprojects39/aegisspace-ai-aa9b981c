@@ -22,13 +22,13 @@
 // ---------------------------------------------------------------------------
 // Network & Cloud Config
 // ---------------------------------------------------------------------------
-#define WIFI_SSID        "Infinix NOTE 40X 5G"
-#define WIFI_PASSWORD    "ARYANSAHU7002"
+#define WIFI_SSID        "WIFI_SSID_HERE"      // FIXED: replace with your actual WiFi SSID
+#define WIFI_PASSWORD    "WIFI_PASSWORD_HERE"  // FIXED: replace with your actual WiFi password
 #define DEVICE_ID        "esp32-001"
 
 // FIXED: use http:// not https:// to avoid TLS handshake failure
-#define N8N_WEBHOOK_URL  "http://aryan3929.app.n8n.cloud/webhook/aegis-telemetry"
-#define WEBHOOK_API_KEY  "1a705912ba7a6414a3bc4c84b54aad9daf39ffcd3b89255dd80632f896910cb8"
+#define N8N_WEBHOOK_URL  "http://n8n.yourdomain.com/webhook/FLARE"
+#define WEBHOOK_API_KEY  "YOUR_WEBHOOK_API_KEY_HERE"  // FIXED: replace with your actual n8n webhook API key
 
 // ---------------------------------------------------------------------------
 // Hardware Pins  (matching your documented circuit exactly)
