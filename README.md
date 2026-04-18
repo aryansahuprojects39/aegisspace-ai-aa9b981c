@@ -126,11 +126,11 @@ npm install   # or: bun install
 Create a `.env` file in the project root. **Never commit this file.**
 
 ```env
-VITE_SUPABASE_URL=https://lsugsoavpzqzziglqxxz.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_zbWE65HL-VX3XkTOaCwrMw_BpfTrw4V
-VITE_SUPABASE_PROJECT_ID=lsugsoavpzqzziglqxxz
-SUPABASE_URL=https://lsugsoavpzqzziglqxxz.supabase.co
-SUPABASE_ANON_KEY=sb_publishable_zbWE65HL-VX3XkTOaCwrMw_BpfTrw4V
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_SUPABASE_PROJECT_ID
+SUPABASE_URL
+SUPABASE_ANON_KEY
 ```
 
 Get these values from: **Supabase Dashboard → Settings → API**
