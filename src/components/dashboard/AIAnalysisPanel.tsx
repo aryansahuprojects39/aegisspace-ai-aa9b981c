@@ -20,6 +20,8 @@ interface AIAnalysisPanelProps {
 }
 
 const REMOTE_AI_ENABLED = import.meta.env.VITE_ENABLE_REMOTE_AI_ANALYSIS === "true";
+// ↑ Set VITE_ENABLE_REMOTE_AI_ANALYSIS=true in .env to use the Supabase edge function.
+//   Without this flag, analysis runs locally (no Claude API call).
 
 // BUG FIX: was a single generic recommendation based only on status level.
 // That meant a temperature anomaly showed the same text as a current/voltage anomaly.
@@ -244,7 +246,15 @@ const AIAnalysisPanel = ({ telemetry, onAnalysisComplete }: AIAnalysisPanelProps
           </div>
         </div>
       ) : error ? (
-        <div className="text-xs text-destructive">{error}</div>
+        <div className="space-y-2">
+          <div className="text-xs text-destructive">{error}</div>
+          {error.includes("Failed to send") || error.includes("network") || error.includes("fetch") ? (
+            <div className="text-[10px] text-muted-foreground">
+              Edge function unreachable. Check VITE_ENABLE_REMOTE_AI_ANALYSIS and that
+              the analyze-telemetry function is deployed and ANTHROPIC_API_KEY secret is set.
+            </div>
+          ) : null}
+        </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center gap-2">
           <Brain className="w-8 h-8 text-muted-foreground/30" />
