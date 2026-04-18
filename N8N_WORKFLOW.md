@@ -571,10 +571,12 @@ docker logs n8n-container
 
 | Metric | Value |
 | --- | --- |
-| Latency (ESP32 → Supabase) | ~500ms - 2s |
-| Throughput | Up to 10 requests/sec per device |
+| Latency (ESP32 → Supabase) | ~3.9s (Gemini AI path) / ~0.5s (rule fallback) |
+| Safe send interval | 4000ms minimum (matches Gemini execution time) |
+| Throughput | 1 request / 4s per device (AI-limited) |
 | Error Rate | < 0.5% (mostly network timeouts) |
 | Database Write Time | ~50-100ms |
+| Supabase Realtime cap | ~100 events/sec (free tier) |
 
 ---
 

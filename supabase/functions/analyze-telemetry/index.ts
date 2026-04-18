@@ -90,7 +90,13 @@ Deno.serve(async (req: Request) => {
   }
 
   // --- Secret ---
+
   const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+  // Explicit logging for debugging secret access
+  console.log("analyze-telemetry: ANTHROPIC_API_KEY present?", !!ANTHROPIC_API_KEY);
+  if (ANTHROPIC_API_KEY) {
+    console.log("analyze-telemetry: ANTHROPIC_API_KEY starts with", ANTHROPIC_API_KEY.slice(0, 8));
+  }
   if (!ANTHROPIC_API_KEY) {
     console.error("analyze-telemetry: ANTHROPIC_API_KEY not set");
     return json({ error: "Server misconfiguration." }, 500);
