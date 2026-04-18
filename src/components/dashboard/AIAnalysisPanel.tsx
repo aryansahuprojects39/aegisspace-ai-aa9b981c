@@ -127,6 +127,9 @@ const AIAnalysisPanel = ({ telemetry, onAnalysisComplete }: AIAnalysisPanelProps
       } else {
         const { data, error: fnError } = await supabase.functions.invoke("analyze-telemetry", {
           body: { telemetryData: current.slice(-10) },
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
         });
         if (fnError) throw fnError;
         if (data?.error) throw new Error(data.error);
